@@ -1,0 +1,653 @@
+---
+title: "Especialidad CD: Multivariante I"
+author: "Minor Bonilla Gómez"
+date: "minor.bonilla@ulead.ac.cr"
+output:
+  rmdformats::material:
+    highlight: kate
+    self_contained: true
+    code_folding: show
+    thumbnails: true
+    gallery: true
+    fig_width: 4
+    fig_height: 4
+    df_print: kable
+---
+
+```{r echo_f, include=FALSE, message=FALSE, warning=FALSE}
+
+  knitr::opts_chunk$set(echo = FALSE)
+  CLASE00="F:/LEAD/2020/ESS/002 IMAGENES/CL00/"  
+  CLASE01="F:/LEAD/2020/ESS/002 IMAGENES/CL01/"
+  PONENCIA="F:/BKLLB/PONENCIAS/ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/IMAGENES/"
+  RUTAACTUAL="F:/LEAD/2020/ESP/CLASES/0002/"
+  
+```
+
+```{r, echo=FALSE, out.width = "400px",fig.align="left", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"CIPAD-Logo.png")
+    knitr::include_graphics(IMG)
+```
+
+
+<!------------FORMATO--------------->
+
+<style>
+      .page {
+            transform: translateY(1080px);
+            transition: transform 0 linear;
+            visibility: hidden;
+            opacity: 0;
+            font-size: 20px;
+            margin-left: 1em;
+            }
+      .pages h1 {
+                color: #f5b815;
+                font-style: bold;
+                margin-top: 5px;
+                }
+      .header-panel h4.date {
+                            font-size: 16px;
+                            color: #f5b815;
+                            padding-left: 35px;
+                            margin: 5px 0px;
+                            font-style: bold;
+                            }
+        a, a:focus, a:hover {
+                            color: #99a83d;
+                            }                            
+      body {
+            text-align: justify
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #28105E;
+            background-color: #fff;
+           }
+    .header-panel {
+                  background-color: rgb(33, 44, 85);
+                  min-height: 144px;
+                  position: relative;
+                  z-index: 3;
+                }
+    .panel {
+            margin-bottom: 20px;
+            background-color: rgba(255,255,255,0);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0);
+            box-shadow: 0 1px 1px rgba(0,0,0,0);
+          } 
+    body .container .jumbotron, 
+    body .container .jumbotron-default, 
+    body .container .well, 
+    body .container .well-default, 
+    body .container-fluid .jumbotron, 
+    body .container-fluid .jumbotron-default, 
+    body .container-fluid .well, 
+    body .container-fluid .well-default {
+                                        background-color: #e6e2e2;
+                                        }        
+    .nav-pills>li.active>a,
+    .nav-pills>li.active>a:focus, 
+    .nav-pills>li.active>a:hover {
+                                  color: #fff;
+                                  background-color: rgb(33, 44, 85);
+                                  }
+    .nav-pills>li>a {
+                     border-radius: 4px;
+                    }
+    .nav>li>a {
+              position: relative;
+              display: block;
+              padding: 10px 15px;
+              }
+    a, 
+    a:focus, 
+    a:hover {
+              color: #093e39;
+            }
+    .menu ul li a {
+                  color: rgb(51, 51, 51);
+                  text-decoration: none;
+                  }        
+            
+</style>
+
+# LIBRERIAS
+
+Como buena práctica, siempre como primer paso llamar las librerías que serán utilizadas a lo largo del proceso de ejecución, haciendo con ello más fácil la lectura del documento. Cada vez que una librería sea 
+invocada lo haremos a través de la orden **{NombreLibreria}::{NombreFuncion}**. Recuerde que en caso de no tener instalada la libreria necesaria, basta con llamar el comando **install.packages**.
+
+
+```{r librerias, include=TRUE, message=FALSE, warning=FALSE, echo=TRUE}
+
+library(devtools)
+library(datarium)
+library(stargazer)
+library(ggfortify)
+library(magrittr)
+library(DT)
+library(caret)
+library(rlang)
+library(regclass)
+library(lmtest)
+library(ResourceSelection)
+```
+
+
+# REGRESION LOGÍSTICA {.tabset .tabset-fade .tabset-pills}
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
+```
+
+> ***"...Good teachers teach things, great teachers teach how to learn and how to think..."
+> -Kevin Zeng Hu-***
+
+## OLS a LOGIT
+
+Ahora nuestro fenómeno de estudio se ha sido reducido a dos valores $0$ y $1$.
+
+Aunque puede parecer extraño a primera vista para algunos -o una sobre simplificación para otros- estos $0$s y  $1$s son capaces de resumir de manera natural muchas condiciones cotidinas del tipo si/no, bueno/malo, saludable/enfermo, etc.
+
+$$
+Y = 
+\begin{cases} 
+      1: & \text{si} \\
+      \\
+      0: & \text{no} 
+\end{cases}
+$$
+Ahora no estamos interesados en predecir el valor de Y, sino en clasificar a cada observación, en cada en uno de los dos grupos correspondientes. 
+
+Podemos entonces enfocarnos en definir una métrica que nos permita diferenciar a uno de otro estado, pero además condicionando éste por un conjunto de información que nos permita separar a unos de otros. 
+
+## INTUICION
+
+Apelaremos a la noción de probabilidad, es decir nos interesa poder asignar probabilidades de pertenencia a uno u otro estado, dado un conjunto de información X. 
+
+Ya no estamos interesados en predecir el valor de Y. Por qué?
+
+$$
+  p(x) = P~[~Y = 1~|~X = x~]
+$$
+
+Por completitud, sabemos que habiendo dos estados, la probabilidad del SI adicionada a la probabilidad del NO suman el 100%, así las cosas, cada individuo deberá pertenecer a uno u otro estado.  
+
+Esta situación no es distinta al resultado de lanzar al aire una moneda y obsrvar su resultado CARA|CRUZ; conocido como experimento de Bernoulli.
+
+$$
+  P~[Y=0|X=x]~+P~[Y=1|X=x]~=~1
+$$
+
+Por conveniencia, fijaremos nuestra atención al estado (1: SI), siendo dos los estados al conocer el primero, el segundo queda automáticamente definido; por ejemplo si un evento tiene 75% probabilidad de ocurrir, necesariamente tendrá 25% de no hacerlo, con lo que el estado $Y = 0$ puede ser obtenido de manera trivial al conocer la probabilidad de ocurrencia del estado $Y = 1$
+
+$$
+  P~[Y=0~|~X=x] = 1 - p(x)
+$$
+Pero y que tal si antes de ignorar el estado $Y = 0$ le damos un uso adicional?  
+
+Dado que tenemos dos estados, a cada uno de los cuales podemos asociar una probabilidad de ocurrencia, valdria la pena medir la relación de ocurrencia de uno, con respecto al otro.
+
+Bastaría con dividir las probabilidades asociadas aun estado, con las probabilidades asociadas a su recíproco: 
+
+$$\frac{P_{(Y=1)}}{P_{(Y=0)}}$$
+De manera inmediata sabemos que si dicha razón:
+
+* Es igual a $1$ ambos eventos tienen la misma probabilidad ocurrencia 
+
+* Es mayor a $1$ la probabilidad de que se alcance el estado *1* es mayor que alcanzar el estado *0*, 
+
+* Es menor a $1$ la probabilidad de que se alcance el estado *0* es mayor que alcanzar el estado *1*, 
+
+Hasta ahora, parece que nuestra idea funciona, sólo que tenemos un inconveniente, para eventos en que una de las probabilidades es muy pequeña con respecto a la otra, nuestro operador se dispara al infinito. 
+
+Por tanto interesa entonces restringir ese posible comportamiento a un intervalo; Para ello basta con aplicar el logaritmo a dicha razón.  
+
+Felicidades, hemos llegado de manera intuitiva al concepto de **log odds**
+
+## NOTACIÓN
+
+Usemos ahora nuestra notación habitual, para aquellos que prefieren menos la narrativa. 
+
+Tomamos la relación *OCURRE / NO OCURRE*  y la expresamos como
+
+$$
+  \frac{p(x)}{1 - p(x)} = \frac{P~[Y = 1 |  X = x]}{P~[Y = 0 | X = x]}
+$$
+
+Dado que nuestro operador está contiene valores continuos, qué tal si nos regresamos a nuestro modelo de regresión lineal de la clase anterior y tratamos ahora de predecir nuestro operador **log odd** a través de una **Combinación Lineal** de nuestras $X_p$ variables descriptoras del fenómeno?
+
+
+$$
+\log\left(\frac{p(x)}{1-p(x)}\right) = \beta_0 + \beta_1 x_1 + \ldots  + \beta_{p} x_{p}
+$$
+
+Básicamente "nuestra" propuesta ya existe :( y es conocida como LOGIT
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://en.wikipedia.org/wiki/Logit'>
+</iframe>
+
+
+$$
+\text{logit}(\xi) = \log\left(\frac{\xi}{1 - \xi}\right)
+$$
+
+Y si tomamos la función inversa de la función *logit*? 
+
+
+$$
+\text{logit}^{-1}(\xi) = \frac{e^\xi}{1 + e^{\xi}} = \frac{\xi}{\xi}\frac{1}{1 + e^{-\xi}}=\frac{1}{1 + e^{-\xi}}
+$$
+
+La inversa de *LOGIT* es conocida como función *LOGÍSTICA* y se torna de gran utilidad en nuestro problema para descifrar el vector de coeficientes $\beta$ (alguna literatura trata a la función *LOGISTICA* como función *SIGMOIDE*)
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://en.wikipedia.org/wiki/Sigmoid_function'>
+</iframe>
+
+notar que ésta función define a $x \in\ ]-\infty, \infty[$, retornando valores $y \in\ ]0, 1[$. 
+
+La conveniencia de haber tomado la inversa nos lleva a una forma reducida que será nuestro objeto de estimación para obtener nuestro vector $\beta$
+
+$$
+p({x}) = P[Y = 1 | X =  x] = \frac{e^{\beta_0 + \beta_1 x_{1} + \cdots + \beta_{p-1} x_{p-1}+\beta_{p} x_{p}}}{1 + e^{\beta_0 + \beta_1 x_{1} + \cdots + \beta_{p-1} x_{p-1} + \beta_{p} x_{p}}}
+$$
+
+$$
+p(x) = P[Y = 1 |X = x] = \frac{1}{1 + e^{-\beta_0 - \beta_1 x_{1} - \cdots - \beta_{p-1} x_{p-1}- \beta_{p} x_{p}}}\\
+p(x) = P[Y = 1 |X = x]=\frac{1}{1 + e^{-(\beta_0 + \beta_1 x_{1} + \cdots + \beta_{p-1} x_{p-1}+ \beta_{p} x_{p})}}
+$$
+
+# OBTENCION de COEFICIENTES
+
+Ahora nuestra tarea se redujo a obtener los parámetros $\beta$
+
+$$
+\boldsymbol{{\beta}} = [~\beta_0,~ \beta_1,~ \beta_2,~ \beta_3,~ \ldots,~ \beta_{p}~]
+$$
+
+para ello emplearemos el estimador de *Maxima Verosimilitud*. 
+
+Nos interesa conocer la probabilidad asociada a la realizacion conjunta del set de datos (para todos y no para cada observación). 
+
+Pensemos que nuestra colección de datos fue generado por un mismo proceso de manera independiente, haciendo que la probabilidad conjunta de dicha realización sea la probabilidad de haber ocurrido el evento 1, el evento 2, ..., el evento n-ésimo de manera simultánea. Sabemos que si los eventos son independientes, su probabilidad conjunta vendrá dada por la multiplicatoria de todos los eventos, de manera simultánea.
+
+$$
+L(\boldsymbol{{\beta}}) = \prod_{i = 1}^{n} P[Y_i = y_i | X_i = x_i]
+$$
+
+reexpresando,
+
+$$
+L(\boldsymbol{{\beta}}) = \prod_{i = 1}^{n} p({\bf x_i})^{y_i} (1 - p({\bf x_i}))^{(1 - y_i)}
+$$
+
+$$
+L(\boldsymbol{{\beta}}) = \prod_{i : y_i = 1}^{n} p(x_i) \prod_{j : y_j = 0}^{n} (1 - p({\bf x_j}))
+$$
+
+$$
+L(\boldsymbol{{\beta}}) = \prod_{i : y_i = 1}^{} \frac{e^{\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}}}{1 + e^{\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}}} \prod_{j : y_j = 0}^{} \frac{1}{1 + e^{\beta_0 + \beta_1 x_{j1} + \cdots + \beta_p x_{jp}}}
+$$
+
+A diferencia de Mínimos Cuadrados Ordinarios, la obtención del vector $\beta$ no es directa (*recuerde: En minimos cuadrados vimos que* $\hat \beta = {(X'X)}^{-1} X'Y$) sino que será necesario un método numérico para obtener el vector de coeficientes (*habitualmente el de Newton-Raphson*). 
+
+Si obviamos ese paso, podemos apoyarnos en `R` que tiene especificados una serie de algoritmos para resolver este tema particular.
+
+# CONTRATACIÓN {.tabset .tabset-fade .tabset-pills}
+
+## ENTREVISTA
+
+Para someter a prueba a nuestros analistas, hemos decidido crear un conjunto de datos artificiales sobre los que tenemos pleno control. 
+
+Sabemos que Jordan Cristiano Navas [A1] tiende a sobre dimensionar sus conocimientos y pensamos que está siendo victima de las modas. 
+
+Por otro lado Bryan Chinchilla [A2] muestra un perfil completamente distinto que tambien queremos evaluar.
+
+Dimos a ambos el mismo conjunto de datos. *A1* de manera inmediata respondió con la herramienta que más conoce (o de la que más ha oído hablar en sus foros de 'Data Scientists': Regresión lineal)
+
+Veamos qué sucede con sus resultados, a partir de que nosotros sabemos que los datos tienen las siguientes características:
+
+$$
+\log\left(\frac{p({\bf x})}{1 - p({\bf x})}\right) = -2 + 3 x
+$$
+
+que como sabemos de nuestra lectura puede ser reexpresado como:
+
+$$
+\begin{aligned}
+Y_i \mid {\bf X_i} = {\bf x_i} &\sim \text{Bern}(p_i) \\
+p_i &= p({\bf x_i}) = \frac{1}{1 + e^{-\eta({\bf x_i})}} \\
+\eta({\bf x_i}) &= -2 + 3 x_i
+\end{aligned}
+$$
+
+algo que desconoce nuestro *A1* dado que eso "no le resultó importante" dado su limitado... Tiempo.
+
+## SET DE DATOS
+
+Así las cosas, procedemos a generar nuestro conjunto de datos con las siguientes instrucciones
+
+```{r, echo=TRUE}
+set.seed(123456789)
+nDatos = 25 
+beta_0 = -2
+beta_1 = 3
+
+x = rnorm(n = nDatos)
+phi = beta_0 + beta_1 * x
+p = 1 / (1 + exp(-phi))
+y = rbinom(n = nDatos, size = 1, prob = p)
+DatosLogisticos=data.frame(y, x)
+head(DatosLogisticos)
+```
+
+La simulación del conjunto de datos pretende de manera controlada realizar el contraste entre instrumentos y con ello evidenciar el problema de emplear un martillo para cortar una madera fina.
+
+## RESULTADOS
+
+Tengamos presente que nuestra variable *Y* toma sólo dos valores, a saber, 0 ó 1, algo que parece no incomodar a nuestro *A1* quien decide usar el único instrumento que conoce para hacer frente al problema de estimación que le ha sido asignado. 
+
+Paralelamente *A2* se percata de la estructura de los datos, los estudia y decide estimar un modelo más adecuado para variable binaria, dado que observa que la variable *Y* presenta este comportamiento.
+
+```{r,, echo=TRUE}
+# Analista 1. Estimación por Minimos Cuadrados Ordinarios
+fit_An1  = glm(y ~ x, data = DatosLogisticos, family = gaussian)
+
+# Analista 2. Estimación Logistica
+fit_An2 = glm(y ~ x, data = DatosLogisticos, family = binomial)
+```
+
+Nuestro *A1* ha decidido no prestar importancia al parametro [family] pues eso "no lo entiende" pero "parece lo mismo" que encontró en una web de la que simplemente "copió y pegó" lo que pudo.
+
+Adicionalmente nuestro *A2* -quien sabemos hace menor alarde de su conocimiento- sabe que cuando llega el momento de realizar predicciones, el objeto 'glm' -que está preparado para retornar valores distintos en función a lo que se le solicita- le retornará algo que podria no necesitar. 
+
+*R* ha dispuesto el parametro 'type' que a solicitud retorna, nuestra conocida razon *odds* o la probabilidad calculada para cada observación
+
+## EVALUANDOLOS                    
+
+```{r, , echo=TRUE}
+plot(y ~ x, data = DatosLogisticos, 
+pch = 20, ylab = "Probabilidad Estimada", 
+main = "Minimos Cuadrados [MCO] vs Regresion Logistica [RLG]")
+grid()
+abline(fit_An1, col = "darkorange")
+curve(predict(fit_An2, data.frame(x), type = "response"), add = TRUE, col = "dodgerblue", lty = 2)
+legend("topleft", c("MCO", "RLG", "Data"), lty = c(1, 2, 0), 
+pch = c(NA, NA, 20), lwd = 2, col = c("darkorange", "dodgerblue", "black"))
+```
+
+de manera conveniente la variable *Y* fue creada a partir de un único regresor, lo que nos facilita su visualización. 
+
+Recordemos que
+
+$$
+\log\left(\frac{p(x)}{1 - p(x)}\right) = -2 + 3 x
+$$
+
+En naranja se muestra la estimación realizada empleando Regresion Lineal, mientras que la linea punteada contiene la estimación obtenida a partir de la regresión logística.
+
+$$P[Y = 1 | X = {\bf x}]$$
+
+Sabiendo que estamos interesados en obtener un estimador para la probabilidad de cada uno de los individuos, notamos de manera inmediata un problema con la regresion lineal: Lo ven?
+
+Como esperábamos las probabilidades obtenidas empleando la regresión logística se encuentran en el intervalo $]0,1[$ 
+
+Le pedimos ahora a nuestros analistas, que realicen algunas predicciones con sus modelos para algunos valores específicos de *X*
+
+```{r, , echo=TRUE}
+library(kableExtra)
+x_test=c(-6.0,-2,0,2,6.0)
+kable(x_test)
+```
+
+para ello cada quien necesitará recuperar los coeficientes asociados a su estimación.
+
+* ANALISTA1:
+```{r, , echo=TRUE}
+coef(fit_An1)
+```
+
+Con lo que el modelo para el *A1* toma la forma:
+
+$$
+Y = 0.29 + 0.25 X
+$$
+* ANALISTA2:
+```{r, , echo=TRUE}
+#ANALISTA2
+coef(fit_An2)
+```
+
+mientras que el modelo de *A2*:
+
+$$
+\hat{P}[Y = 1 | X ] = \frac{e^{-2.1 + 2.7 X}}{1 + e^{-2.3 + 2.7 X}}
+$$
+
+veamos que pasó con las probabilidades de uno y otro:
+
+* ANALISTA1:
+```{r}
+prob1=predict(fit_An1, data.frame(x = c(-6.0,-2,0,2,6.0)))
+round(prob1,2)
+```
+
+* ANALISTA2:
+```{r, , echo=TRUE}
+prob2=predict(fit_An2, data.frame(x = c(-6.0,-2,0,2,6.0)), type="response")
+round(prob2,2)
+```
+
+Los resultados obtenidos por *A1* parecen ser un problema. Sus probabilidades no sólo arrojan probabilidades superiores al 100% sino que además tiene probabilidades negativas! 
+
+# DIAGNÓSTICOS
+
+Como lo habiamos hecho con la regresion lineal, debemos ahora evaluar si los resultados tienen validez estadística.  
+
+A modo de definir un *proceso* o *lista de chequeo* éste tipo de elementos son aquellos que con mayor frecuencia prestaremos atencion (esta lista no es exhaustiva ni pretende ser un recetario)
+
+## Significancia individual de los parámetros $\beta$
+
+### Test de Wald
+
+En regresión lineal nos planteábamos la hipótesis de que nuestros coeficientes fueran iguales a *CERO*
+
+$$
+H_0: \beta_j = 0 \quad \text{vs} \quad H_1: \beta_j \neq 0
+$$
+
+En regresión logística tambien podemos plantearnos dicha hipótesis, así que de manera general podemos preguntarle a TODOS los coeficientes si -de manera simultánea- son iguales a cero (lo que nos devolvería a un modelo de probabilidad incondicional, por qué?) 
+
+Nos basta un pequeño ajuste para poder reutilizar el conocido test de Wald de Regresion Lineal o test $t$.  
+
+Cuando nos movemos a la regresión logística, éste test deja de distribuir como $T$ y en su lugar distribuye como $NORMAL$ tomando una forma similar a Regresión Lineal, con el único cambio mencionado en su distribución. 
+$$
+  z~~ = ~~\frac{\hat{\beta}_j - \beta_j}{\text{SE}[\hat{\beta}_j]} 
+      ~~\overset{\text{aprox}}{\sim}
+      ~~N(0, 1)
+$$
+
+#### Razón de Verosimilitud
+
+$$
+H_0: \beta_1 = \beta_{2} = \cdots = \beta_{p} = 0.
+$$
+Recordemos que para obtener los coeficientes del modelo logístico, empleamos el concepto de Máxima Verosimilitud, que no es más que una función, que retorna un valor. 
+
+Denotemos como *L* a la función de Máxima Verosimilitud y procedamos a comparar el resultado que nos retorna dicha función con nuestro modelo estimado *completo* versus el modelo en que todos nuestros coeficientes resultan iguales a cero *nulo*. Es decir, vamos a contrastar si la incorporación de las variables *X* o información, mejoró nuestra estimación con respecto a uno que otorga la misma probabilidad a todas las observaciones. 
+
+Se define el test de verosimilitud como la razón logaritmica entre en modelo NULO versus uno COMPLETO.  
+
+Denotando dicho contraste como $D$ tenemos que:
+
+$$
+D = -2 \log \left( \frac{L(\boldsymbol{\hat{\beta}_{\text{Nulo}}})} {L(\boldsymbol{\hat{\beta}_{\text{Completo}}})} \right) = 2 \log \left( \frac{L(\boldsymbol{\hat{\beta}_{\text{Completo}}})} {L(\boldsymbol{\hat{\beta}_{\text{Nulo}}})} \right) = 2 \left( \ell(\hat{\beta}_{\text{Completo}}) - \ell(\hat{\beta}_{\text{Nulo}})\right)
+$$
+
+Sabemos que cuando la muestra es grande, este test distribuye Chi-Cuadrado 
+
+$$
+   D \overset{\text{aprox}}{\sim} \chi^2_{k}
+$$
+
+con $k = p - q$ denotando la diferencia entre la cantidad de coeficientes de uno y otro modelo. 
+
+
+# `SAheart` {.tabset .tabset-fade .tabset-pills}
+
+Los datos provienen de una muestra de masculinos con problemas cardíacos, en una zona de alta incidencia en Sudáfrica. 
+
+```
+chd:       Indicates whether or not coronary heart disease is present in an individual
+sbp:       Systolic blood pressure
+tobacco:   Cumulative tobacco (kg)
+ldl:       Low density lipoprotein cholesterol
+adiposity: A numeric vector
+famhist:   Family history of heart disease, a factor with levels Absent Present
+typea:     Type-A behavior
+obesity:   A numeric vector
+alcohol:   Current alcohol consumption
+age:       Age at onset
+coronary:  Heart disease
+```
+
+
+```{r}
+data("SAheart")
+```
+
+```{r, echo = FALSE}
+DT::datatable(SAheart)
+```
+
+## ESTIMACIÓN
+
+Iniciamos estimando el modelo de probabilidad asociado al problema cardiaco y su eventual relación con el colesterol
+
+$$
+\log\left(\frac{P[\texttt{CHD} = 1]}{1 - P[\texttt{CHD} = 1]}\right) = \beta_0 + \beta_{\texttt{LDL}}  X_{\texttt{LDL}}
+$$
+El modelo más simple de todos
+
+```{r, echo=TRUE}
+chd_mod_NULO = glm(chd ~ 1, data = SAheart, family = binomial)
+summary(chd_mod_NULO)
+```
+
+
+```{r, echo=TRUE}
+chd_mod_ldl = glm(chd ~ ldl, data = SAheart, family = binomial)
+summary(chd_mod_ldl)
+```
+
+Contrastamos las probabilidades obtenidas con los valores observados. Se puede notar como al incrementar *LDL* incrementa la probabilidad del estado *CHD*
+
+Nos interesa validar la hipótesis sobre la relevancia individual de nuestras variables, retomando el test de **WALD** 
+
+$$
+H_0: \beta_{\texttt{LDL}}  = 0
+$$
+
+Así como lo hicimos con Regresión Lineal, debemos estar atentos al valor  "$t$" (en realidad $z$) que retorna *R*, cuando solicitamos hacemos uso de la función `summary()` y propiamente su probabilidad asociada. 
+
+Ese bajo valor, nos permite rechazar la hipótesis nula de que el coeficiente asociado al variable *LDL* sea igual a cero, sugiriendo que dicha variable es un buen predictor de nuestro fenomeno en estudio.
+
+```{r, echo=TRUE}
+
+
+plot(jitter(chd, factor = 0.1) ~ ldl, data = SAheart, pch = 20, 
+     ylab = "Prob. de CHD", xlab = "LDL Chol")
+grid()
+curve(predict(chd_mod_ldl, data.frame(ldl = x), type = "response"), 
+      add = TRUE, col = "dodgerblue", lty = 2)
+```
+
+
+Veamos que pasa si agregamos el resto de variables:
+
+```{r, echo=TRUE}
+chd_mod_COMPLETO = glm(chd ~ ., data = SAheart, family = binomial)
+stargazer(chd_mod_COMPLETO, type='text')
+```
+
+teniendo ahora el conjunto de variables completo, podemos plantearnos la 2da hipótesis: Son conjuntamente todos los coeficientes iguales a cero? 
+
+$$
+H_0: \beta_{\texttt{sbp}} = \beta_{\texttt{tobacco}} = \beta_{\texttt{adiposity}} = \beta_{\texttt{famhist}} = \beta_{\texttt{typea}} = \beta_{\texttt{obesity}} = \beta_{\texttt{alcohol}} = \beta_{\texttt{age}} = 0
+$$
+
+que como recordamos no es más que una diferencia de logaritmos que en *R* podemos plantear como:
+
+```{r, echo=TRUE}
+logLik(chd_mod_COMPLETO)
+logLik(chd_mod_NULO)
+testMV= 2*as.numeric(logLik(chd_mod_COMPLETO) - logLik(chd_mod_NULO))
+print(testMV)
+pchisq(testMV, df=9,lower.tail = FALSE)
+```
+
+o alternativamente podemos pedirle a R que lo haga por nosotros:
+
+```{r, echo=TRUE}
+lmtest::lrtest (chd_mod_COMPLETO)
+```
+
+El resultado del p-value es lo suficientemente bajo, como para  descartar la hipotesis de que nuestros coeficientes sean todos iguales a cero, con lo que comenzamos a pensar que nuestros predictores cumplen bien su tarea.
+
+## Intervalos de Confianza
+
+Recordemos que nuestros parámetros siguen su propia distribución, con lo que además de su valor medio (el que retornan los paquetes) nos interesa conocer el intervalo que circunda a nuestro parametro.
+
+Para ello *R* facilita la funcion `confint()` que realiza dicha tarea.
+
+```{r, echo=TRUE}
+confint(chd_mod_COMPLETO, level = 0.8)
+```
+
+## CLASIFICACIÓN
+
+Gran parte de la importancia de la metodologia de Regresión Logística consiste en poder obtener una métrica que nos permita separar nuestras observaciones. 
+
+Esta métrica (que en este caso particular toma la forma de probabilidad) es uno de lo resultados más valorados en la estimación pues nos permite asignar a cada observacion al grupo $Y = 1$ o $Y = 0$
+
+```{r, warning=FALSE, echo=TRUE}
+library(ResourceSelection)
+datos=SAheart
+datos$Y_pred=predict(chd_mod_COMPLETO,SAheart, type="response")
+confusion_matrix(chd_mod_COMPLETO)
+```
+## HL
+El test HL (Hosmer-Lemeshow) es un test que mide la bondad del ajuste. Las observaciones son ordenadas de manera ascendente en P (en nuestro caso elegimos P=10) grupos de acuerdo a su probabilidad estimada por nuestro modelo. De forma tal que el primer decil contiene las observaciones cuya probabilidad fue la menor observada mientras que el decil 10 contiene aquellas con las probabilidades superiores. Contrastamos entonces, las probabilidades estimadas con los datos observados, a fin de validar si nuestro modelo produce métricas|probabilidades coherentes con la realidad de los datos. 
+
+Nuestra hipótesis nula $H_0$, consiste en suponer que nuestro modelo no tiene un correcto ajuste, con lo que, probabilidades inferiores a 0.1 nos impedirían rechazar dicha hipótesis. 
+
+Al realizar dicho test, éste nos permite rechazar $H_0$ en favor de que nuestro modelo ofrece un buen ajuste para nuestro fenómeno en estudio.
+
+```{r, warning=FALSE, echo=TRUE}
+ResourceSelection::hoslem.test(datos$chd, fitted(chd_mod_COMPLETO), g=10)
+```
+
+# ANEXOS
+
+ANEXO 1
+
+```{r, echo=FALSE}
+xfun::embed_file('F:/LEAD/2020/ESP/CLASES/0004/SAHeart.xlsm')
+```
+
+# .
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE00,"gracias.gif")
+    knitr::include_graphics(IMG)
+```

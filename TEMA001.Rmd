@@ -1,0 +1,1106 @@
+---
+title: "Especialidad CD: Multivariante I"
+author: "Minor Bonilla Gómez"
+date: "minor.bonilla@ulead.ac.cr"
+output:
+  rmdformats::material:
+    highlight: kate
+    self_contained: true
+    code_folding: show
+    thumbnails: true
+    gallery: true
+    fig_width: 4
+    fig_height: 4
+    df_print: kable
+---
+memory.limit(size=17000)
+
+```{r echo_f, include=FALSE, message=FALSE, warning=FALSE}
+  knitr::opts_chunk$set(echo = FALSE)
+  CLASE01="F:/LEAD/2020/ESS/002 IMAGENES/CL01/"
+  CLASE00="F:/LEAD/2020/ESS/002 IMAGENES/CL00/"
+  PONENCIA="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/IMAGENES/"
+```
+
+```{r IMGLoop, echo=FALSE, out.width = "400px",fig.align="left", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"CIPAD-Logo.png")
+    knitr::include_graphics(IMG)
+```
+
+
+<!------------FORMATO--------------->
+
+<style>
+      .page {
+            transform: translateY(1080px);
+            transition: transform 0 linear;
+            visibility: hidden;
+            opacity: 0;
+            font-size: 20px;
+            margin-left: 1em;
+            }
+      .pages h1 {
+                color: #f5b815;
+                font-style: bold;
+                margin-top: 5px;
+                }
+      .header-panel h4.date {
+                            font-size: 16px;
+                            color: #f5b815;
+                            padding-left: 35px;
+                            margin: 5px 0px;
+                            font-style: bold;
+                            }
+        a, a:focus, a:hover {
+                            color: #99a83d;
+                            }                            
+      body {
+            text-align: justify
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #28105E;
+            background-color: #fff;
+           }
+    .header-panel {
+                  background-color: rgb(33, 44, 85);
+                  min-height: 144px;
+                  position: relative;
+                  z-index: 3;
+                }
+    .panel {
+            margin-bottom: 20px;
+            background-color: rgba(255,255,255,0);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0);
+            box-shadow: 0 1px 1px rgba(0,0,0,0);
+          } 
+    body .container .jumbotron, 
+    body .container .jumbotron-default, 
+    body .container .well, 
+    body .container .well-default, 
+    body .container-fluid .jumbotron, 
+    body .container-fluid .jumbotron-default, 
+    body .container-fluid .well, 
+    body .container-fluid .well-default {
+                                        background-color: #e6e2e2;
+                                        }        
+    .nav-pills>li.active>a,
+    .nav-pills>li.active>a:focus, 
+    .nav-pills>li.active>a:hover {
+                                  color: #fff;
+                                  background-color: rgb(33, 44, 85);
+                                  }
+    .nav-pills>li>a {
+                     border-radius: 4px;
+                    }
+    .nav>li>a {
+              position: relative;
+              display: block;
+              padding: 10px 15px;
+              }
+    a, 
+    a:focus, 
+    a:hover {
+              color: #093e39;
+            }
+    .menu ul li a {
+                  color: rgb(51, 51, 51);
+                  text-decoration: none;
+                  }        
+            
+</style>
+
+<!------------CONTENIDO--------------->
+
+#  {.tabset .tabset-fade .tabset-pills}
+
+```{r, out.width = "600px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(PONENCIA,"Fractal Loop 2.gif")
+    knitr::include_graphics(IMG)
+```
+
+# LIBRERIAS
+
+```{r librerias, include=TRUE, message=FALSE, warning=FALSE, echo=TRUE}
+
+  suppressPackageStartupMessages(library(devtools))   # Instalación desde Github
+  suppressPackageStartupMessages(library(xfun))       # Anexo de externos
+  suppressPackageStartupMessages(library(datarium))   # Sets de Datos
+  suppressPackageStartupMessages(library(zoo))        # Análisis
+  suppressPackageStartupMessages(library(ggfortify))
+  suppressPackageStartupMessages(library(magrittr))   # 
+  suppressPackageStartupMessages(library(DT))         # Manejo de tablas
+  suppressPackageStartupMessages(library(tidyverse))  # Manipulacion de Datos
+  suppressPackageStartupMessages(library(cluster))    # Algoritmos de Clasificación
+  suppressPackageStartupMessages(library(factoextra)) # Visualizacion de Clusters
+  suppressPackageStartupMessages(library(gridExtra))  # Visualizacion de Clusters
+  suppressPackageStartupMessages(library(kableExtra)) # Formato de Tablas
+  suppressPackageStartupMessages(library(stargazer))
+  suppressPackageStartupMessages(library(caret))
+  suppressPackageStartupMessages(library(rlang))
+  suppressPackageStartupMessages(library(regclass))
+
+```
+
+# BIENVENIDA {.tabset .tabset-fade .tabset-pills}
+
+```{r , out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE00,"Bosque.gif")
+    knitr::include_graphics(IMG)
+```
+
+## MISCELANEOS
+
+* Expectativas vs Realidad
+
+    * Horas estudiante
+    * Trabajo Extra-clase
+    * R + XCL
+
+* Canales de comunicación
+  
+  * Email
+  * Portal
+    * Material
+
+## DECEPCIONES
+```{r comic001, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"comic001.png")
+    knitr::include_graphics(IMG)
+```
+
+# HISTORIA {.tabset .tabset-fade .tabset-pills}
+
+Contextualicemos un poco | y viajemos en el tiempo
+
+## IPHONE
+
+```{r Iphone, out.width = "300px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG="D:/FOTOS/RMarkDowns/Iphone11.jpg"
+    knitr::include_graphics(IMG)
+```
+
+## TL 00
+
+```{r imgPearson1896, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"Pearson.PNG")
+    knitr::include_graphics(IMG)
+```
+
+## TL 01
+
+* Qué hacíamos los humanos?
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://www.wdl.org/en/sets/world-history/timeline/#0'>
+</iframe>
+
+[Cápsula 1](https://www.wdl.org/en/sets/world-history/timeline/#0)
+
+
+## TL 02
+
+* Qué tan 'superior' es nuestro conocimiento moderno?
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://mathigon.org/timeline'>
+</iframe>
+
+[Cápsula 2](https://mathigon.org/timeline)
+
+## TL03
+
+ISHANGO (20 000 AC)
+
+```{r Ishango, out.width = "300px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG="D:/FOTOS/RMarkDowns/Ishango.jpg"
+    knitr::include_graphics(IMG)
+```
+
+### El hueso de Ishango: Uso
+
+```{r IshangoUso, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG="D:/FOTOS/RMarkDowns/IshangoUso.png"
+    knitr::include_graphics(IMG)
+```
+
+* Origen de la contabilidad
+
+* "...puede haberse usado como una herramienta para llevar a cabo procedimientos matemáticos..."
+
+* De la mano con la escritura (registrar) siempre existió la necesidad de medir
+
+# ENSEÑANZA {.tabset .tabset-fade .tabset-pills}
+
+<p align="center">
+<iframe 
+width="900" 
+height="600"
+src="https://www.youtube.com/embed/T76GlYybmVo">
+</iframe>
+
+# MODAS {.tabset .tabset-fade .tabset-pills}
+
+## ECONOMIST
+
+```{r BigData000, out.width = "700px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"BigData000.JFIF")
+    knitr::include_graphics(IMG)
+```
+
+## TIME
+
+```{r BigData001, out.width = "700px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"BigData001.PNG")
+    knitr::include_graphics(IMG)
+```
+
+## GOOGLE
+
+<iframe id="trends-widget-1" title="trends-widget-1" src="https://trends.google.com:443/trends/embed/explore/TIMESERIES?req=%7B%22comparisonItem%22%3A%5B%7B%22keyword%22%3A%22Data%20Science%22%2C%22geo%22%3A%22US%22%2C%22time%22%3A%222008-10-05%202020-06-13%22%7D%5D%2C%22category%22%3A0%2C%22property%22%3A%22%22%7D&amp;tz=360&amp;eq=date%3D2008-10-05%25202020-06-10%26geo%3DUS%26q%3DData%2520Science" width="100%" frameborder="0" scrolling="1" style="height:450px;">
+</iframe>
+
+<iframe id="trends-widget-1" title="trends-widget-1" src="https://trends.google.com:443/trends/embed/explore/RELATED_QUERIES?req=%7B%22comparisonItem%22%3A%5B%7B%22keyword%22%3A%22data%20science%22%2C%22geo%22%3A%22US%22%2C%22time%22%3A%22today%2012-m%22%7D%5D%2C%22category%22%3A0%2C%22property%22%3A%22%22%7D&amp;tz=360&amp;eq=q%3Ddata%2520science%26geo%3DUS%26date%3Dtoday%2012-m" width="100%" frameborder="0" scrolling="1" style="height: 400px;">
+</iframe>
+
+## 2012
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"HBR.JPG")
+    knitr::include_graphics(IMG)
+```
+
+> ... Who Are These People?  
+If capitalizing on big data depends on hiring scarce data scientists, then the challenge for managers is to learn how to identify that talent, attract it to an enterprise, and make it productive. None of those tasks is as straightforward as it is with other, established organizational roles. Start with the fact that there are no university programs offering degrees in data science. There is also little consensus on where the role fits in an organization, how data scientists can add the most value, and how their performance should be measured...  
+
+>...What kind of person does all this? 
+What abilities make a data scientist successful? Think of him or her as a hybrid of data hacker, analyst, communicator, and trusted adviser. The combination is extremely powerful—and rare...
+
+## 2019
+
+>"...data scientists don’t actually build or maintain data infrastructures; if data infrastructures aren’t set up efficiently the work of a data scientist will be in vain..."
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://www.information-age.com/data-engineer-sexiest-job-21st-century-123480578/' >
+</iframe>
+
+## LINKEDIN
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"LinkedIn 001.JPG")
+    knitr::include_graphics(IMG)
+```
+
+## ABOGADOS
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://www.abogados.or.cr/consultaagremiados/' >
+</iframe>
+
+## LO IMPORTANTE
+
+```{r BigData002, out.width = "700px", fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"BigData002.PNG")
+    knitr::include_graphics(IMG)
+```
+
+# LIBROS {.tabset .tabset-fade .tabset-pills}
+
+ Muchos; vivimos en un mundo digital (i.e. ésta charla)  
+ 
+ * Gratis
+ * Accesibles
+ 
+ pero..
+
+## PUB00
+
+<p align="center">
+<iframe src="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/TS.pdf" 
+         width="820" 
+         height="1200" 
+         type="application/pdf" 
+         style="width:718px; 
+         height:700px;
+         " frameborder="0">
+</iframe>
+
+## PUB01
+
+<p align="center">
+<iframe src="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/TS multi.pdf" 
+         width="820" 
+         height="1200" 
+         type="application/pdf" 
+         style="width:718px; 
+         height:700px;
+         " frameborder="0">
+</iframe>
+
+## PUB02
+
+<p align="center">
+<iframe src="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/Stats.pdf" 
+         width="820" 
+         height="1200" 
+         type="application/pdf" 
+         style="width:718px; 
+         height:700px;
+         " frameborder="0">
+</iframe>
+
+## PUB03
+
+<p align="center">
+<iframe src="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/mml-book.pdf" 
+         width="820" 
+         height="1200" 
+         type="application/pdf" 
+         style="width:718px; 
+         height:700px;
+         " frameborder="0">
+</iframe>
+
+## PERO
+
+> Muchos no hacen la tarea -les resulta más fácil copiar el trabajo de otro-
+> pero sucede que cuando no se ha estudiado un tema, puede resultar difícil evitar
+> persignarse ante un horno de barro.
+
+[IR A PAGINA](https://github.com/AceLewis/my_first_calculator.py)
+
+<p align="center">
+<object 
+  data ="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/CalculadoraPy.txt" type="text/plain"
+  width="900" 
+  style="height: 600px">
+  <a href="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/CalculadoraPy.txt">No Support?</a>
+</object>
+
+# ROSLING
+
+## HANS (RIP) {.tabset .tabset-fade .tabset-pills}
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Hans_Rosling'>
+</iframe>
+
+## GAPMINDER 01
+<p align="center">
+<iframe src="//www.gapminder.org/tools/?embedded=true#$chart-type=bubbles" style="width: 100%; height: 500px; margin: 0 0 0 0; border: 1px solid grey;" allowfullscreen></iframe>
+
+ 
+[GAPMINDER](https://www.gapminder.org)
+
+
+## EN R
+```{r gapminder, echo = TRUE, out.width = "600px", fig.align="center", message=TRUE, warning=FALSE}
+    
+    gapminder::gapminder %>%
+      plotly::plot_ly(
+                      x = ~log(gdpPercap), 
+                      y = ~lifeExp, 
+                      size = ~pop, 
+                      color = ~continent, 
+                      frame = ~year, 
+                      text = ~country, 
+                      hoverinfo = "text",
+                      type = 'scatter',
+                      mode = 'markers'
+                      )
+```
+
+# AVANCES {.tabset .tabset-fade .tabset-pills}
+
+El mundo ha seguido avanzando en todas direcciones...
+[EVANGELISMO???](https://www.cosoit.com/bg-data-evangelist)
+
+## RUBIK
+
+```{r imgRubik, out.width = "700px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"Avances002.PNG")
+    knitr::include_graphics(IMG)
+```
+
+## DISCRIMINACIÓN
+
+```{r imgAIProfiling, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"Avances003.PNG")
+    knitr::include_graphics(IMG)
+```
+  
+# PROCESO {.tabset .tabset-fade .tabset-pills}
+
+## INPUT
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE00,"InPutOutPut.gif")
+    knitr::include_graphics(IMG)
+```
+
+## FLUJO
+
+```{r imgMSFT001, out.width = "1000px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"Proceso001.PNG")
+    knitr::include_graphics(IMG)
+```
+  
+## ROADMAP
+
+```{r imgMSFT002, out.width = "1000px",fig.align="center", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"Proceso002.PNG")
+    knitr::include_graphics(IMG)
+```
+  
+Tomado de: 
+(https://docs.microsoft.com/en-us/azure/machine-learning/team-data-science-process/overview)
+
+# DATOS: TABLA {.tabset .tabset-fade .tabset-pills}
+
+Nuestras tablas tendrán la configuración rectangular *NP* siendo *N* la cantidad de individuos y *P* la cantidad de variables o dimensiones asociadas a ellos.
+
+```{r, out.width = "800px",fig.align="CENTER", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=IMG=paste0(CLASE01,"TABLA_np.jpg")
+    knitr::include_graphics(IMG)
+```
+
+## ------------------------
+
+## NAs
+Teniendo claro que no todas las tablas contienen la cantidad completa de observaciones vale la pena notar, que las observaciones faltantes son un tema a tratar antes de iniciar nuestro analisis. Éste es un tema que por sí mismo envuelve una discusión completa; discusión que no será tratada en este documento, por ahora, haremos uso de la funcion *na.omit()* que omite el uso del registro completo, si a éste le falta una medición en cualquiera de las dimensiones o variables.
+
+## SCALE
+A fin de evitar que temas irrelevantes -como la unidad de medida de la variable- conduzcan a sesgos evitables, procedemos ademas a estandarizar los datos, a fin de que todas las dimensiones mantengan equilibrio y evitemos con ello que una sola variable absorva la responsabilidad absoluta. Esta estandarización es facilitada en *R* a partir del uso de la función **scale()** conduciendo a una transformación en nuestras variables, forzando que todas y cada una de ellas esté centrada en *CERO* con desviacion estandar de *UNO*
+
+$ESCALAMIENTO :  \frac{(x{_i}-\mu)}{\sigma}$
+
+# R {.tabset .tabset-fade .tabset-pills}
+
+## R
+
+> R es un entorno y lenguaje de programación con un 'enfoque' al análisis estadístico.  
+
+> R nació como una reimplementación de software libre del lenguaje S. Se trata de uno de los lenguajes de programación más utilizados en investigación científica, siendo además muy popular en el campo de la minería de datos, la investigación biomédica, la bioinformática y las matemáticas financieras. A esto contribuye la posibilidad de cargar diferentes bibliotecas o paquetes con funcionalidades de cálculo y graficación.
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/R_(lenguaje_de_programaci%C3%B3n)' >
+</iframe>
+
+```{r imgR, fig.align="center", out.width = "800px", message=FALSE, warning=FALSE}
+    IMG=paste0(CLASE01,"R_logo.png")
+    knitr::include_graphics(IMG)
+```
+
+  [PASO 1: DESCARGAR R](https://cran.r-project.org/)
+
+  [PASO 2: DESCARGAR R-Studio](https://www.rstudio.com/)
+
+
+[comment]: <> (http://rstudio-pubs-static.s3.amazonaws.com/307184_b2b04467ad41490ab0206cf066de46df.html)
+
+## BASICO
+
+```{r IntroR_001,echo = TRUE, fig.align="center", out.width = "800px", message=FALSE, warning=FALSE}
+a = 123
+b = 456
+x = c(1,6,2)
+y = c(1,4,3)
+
+print(a)
+print(b)
+print(x)
+print(y)
+
+length(x)
+length(y)
+x+y
+ls()
+rm(x,y)
+ls()
+
+```
+
+## MATRICES
+
+```{r IntroR_002,echo = TRUE, fig.align="center", out.width = "800px", message=FALSE, warning=FALSE}
+A1=matrix(data=c(1,2,3,4), nrow=2, ncol=2)
+
+print(A1)
+
+A2=matrix(c(1,2,3,4),2,2,byrow=FALSE)
+A3=matrix(c(1,2,3,4),2,2,byrow=TRUE)
+
+print(A2)
+print(A3)
+
+A1^2
+sqrt(A1)
+A1^0.5
+
+```
+
+## MATRICES: OPERACIONES
+
+```{r IntroR_003,echo = TRUE, fig.align="center", out.width = "800px", message=FALSE, warning=FALSE}
+
+A=matrix(c(1,2,3,4),2,2,byrow=FALSE)
+B=matrix(c(5,6,7,8),2,2,byrow=TRUE)
+
+#Multiplicacion POR ELEMENTOS
+A*B	
+
+#Multiplicacion MATRICIAL
+A %*% B	
+
+#Suma MATRICIAL
+A + B	
+
+#Transposicion
+t(A)
+
+#Diagonilizacion
+diag(A)
+
+diag(3)
+
+#Resolver Sistemas de Ecuaciones
+A=matrix(c(1,0,1,1),2,2,byrow=TRUE)
+b=c(1,3)
+solve(A, b)
+
+VP=eigen(A)
+VP$values
+VP$vectors
+
+```
+
+## ALEATORIOS
+
+```{r IntroR_004,echo = TRUE, fig.align="center", out.width = "800px", message=FALSE, warning=FALSE}
+
+set.seed(1303)
+rnorm(50)
+
+set.seed(3)
+y=rnorm(100)
+mean(y)
+var(y)
+sqrt(var(y))
+sd(y)
+
+x=rnorm(50)
+y=x+rnorm(50,mean=50,sd=.1)
+plot(x,y)
+
+z=-x+rnorm(50,mean=10,sd=.5)
+
+df=data.frame(x,y,z)
+cor(x,y)
+pairs(df, main="Gráfico de Correlaciones")
+
+```
+
+## DATOS
+
+R es capaz de leer multiples fuentes, tanto locales (máquina) como externas (web, db, etc). 
+
+Cargaremos los datos desde un sitio definido, almacenándolos en el entorno R, en un conjunto que llamaremos simplemente DATOS. Una vez cargados, solicitamos el contenido de los primeros [HEAD] así como los últimos [TAIL] 10 registros.
+
+```{r procRIntro01, echo = TRUE, message=FALSE, warning=FALSE}
+  library(xtable)
+  library(knitr)
+  
+  DATOS <- read.csv(url("http://stat511.cwick.co.nz/homeworks/acs_or.csv"))
+
+  A=summary(DATOS)
+  print(A)
+  
+  DT::datatable(A,                    
+                rownames = FALSE, 
+                filter="top",
+                options = list(pageLength = 10, scrollX=T)
+                )
+
+```
+
+## EXPLORACION
+
+```{r procRIntro001, echo = TRUE}
+  DT::datatable(DATOS, 
+                rownames = FALSE, 
+                filter="top",
+                options = list(pageLength = 10, scrollX=T)
+                )
+```
+
+## TABLA {n,p}
+R lee los datos de manera **rectangular** es decir interpreta una tabla (N,P) donde *N* corresponde a la cantidad filas y *P* a la de columnas.
+
+```{r procRIntro02, echo = TRUE}
+
+P=ncol(DATOS)
+N=nrow(DATOS)
+
+print(P)
+print(N)
+
+paste0("TAMAÑO DE LA TABLA: [n=",N,", p=",P,"]")
+
+```
+
+### Mostrar una fila, una columa, o una observación particular:
+
+```{r procRIntro03, echo = TRUE}
+i=2
+j=5
+
+Columna_j = DATOS[,j]  # Retornar TODA LA COLUMNA (j)
+Fila_i    = DATOS[i,]  # Retornar TODA LA FILA (i)
+Celda_ij  = DATOS[i,j] # Retornar LA CELDA(i,j)
+
+head(Columna_j,10)
+print(Fila_i)
+print(Celda_ij)
+``` 
+ 
+```{r procRIntro04, echo = TRUE}
+# En el acto resume una columna y su contenido
+table(DATOS[,6])       
+
+ # notar que tambien puede llamarse a la variable por su nombre a traves del uso de $
+table(DATOS$bedrooms)    
+
+```  
+
+```{r procRIntro05, echo = TRUE}
+# También es inmediata la construcción de tablas cruzadas
+table(DATOS[,6],DATOS[,9])              
+
+# notar que puede llamarse a la variable por su nombre a través del uso de $
+table(DATOS$bedrooms, DATOS$number_children)   
+
+``` 
+
+```{r procRIntro06, echo = TRUE}
+# CLASS es una de las funciones más útiles pues nos retorna información del TIPO de variable
+class(DATOS$language)
+
+class(DATOS$number_children)
+
+``` 
+
+```{r procRIntro07, echo = TRUE}
+
+# Agregando nuevas variables a nuestro set de datos es inmediato
+DATOS$Aleatorio<- rnorm(nrow(DATOS))  
+head(DATOS$Aleatorio,10)
+
+DATOS$Porc_Sal_Esposa <- DATOS$income_wife/(DATOS$income_wife+DATOS$income_husband)
+head(DATOS$Porc_Sal_Esposa,10)
+
+# Algunas ocasiones estamos interesados en condiciones particulares que ocurren 
+# en los datos para grupos particulares
+
+DATOS_Filtrados <- subset(DATOS,DATOS$income_wife>DATOS$income_husband)
+
+```
+
+### Alguna estadística tradicional:
+
+```{r procRIntro08, echo = TRUE}
+
+# PROMEDIO
+mean(DATOS$income_wife)
+
+# MEDIANA
+median(DATOS$age_husband)
+
+# CUANTILES 
+quantile(DATOS$age_wife)
+
+# DESVIACION ESTANDAR
+sd(DATOS$age_wife)
+
+```  
+
+## GRAFICACIÓN
+
+```{r procRIntro10, echo = TRUE}
+# Asi como crear muchisimos tipo de graficacion
+plot(x = DATOS$age_husband , y = DATOS$age_wife, col="red")
+``` 
+
+```{r procRIntro11, echo = TRUE}
+# Permitiendonos la explaración científica de preguntas importantes
+boxplot(age_husband~internet,data = DATOS, col="light blue")
+title(main="Edad del esposo y tenencia de Internet en casa")
+
+boxplot(age_wife~internet,data =DATOS, col="pink")
+title(main="Edad del esposo y tenencia de Internet en casa")
+
+``` 
+
+# ANÁLISIS DE *'CLUSTERS'*  {.tabset .tabset-fade .tabset-pills}
+
+## El problema
+El problema de clasificación de datos, es uno de los problemas mayormente presentes en la realidad humana. De manera cotidiana enfrentamos el hecho de agrupar poblaciones en pequeños segmentos, cada uno compartiendo características similares. Similares? Qué significa? Cómo medirlo?
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='http://shabal.in/visuals/kmeans/3.html'>
+</iframe>
+
+Con el propósito de dar respuesta a estas y otras preguntas, han sido presentadas diversas propuestas que abordan el problema numericamente, todas con un mismo objetivo, lograr que cada individuo sea asignado al grupo que represente de la mejor manera sus características en un espacio multidimiensional. 
+
+Es importante señalar, que no hablamos de particiones arbitrarias y simplistas en los datos -del tipo reglas de negocio- que tienden a ser confundidas con las técnicas de clusterizacion. 
+
+Nos referimos a reglas como "que tengan una edad entre A y B" o bien "que sus ingresos esten entre A y B, menores que A, mayores que B". Esos son ejemplos de *particiones* que no son más que una forma de reducir de manera arbitraria los *n* individuos en unas pocas clases.
+
+Hablamos entonces de técnicas que se fijen en las *p* dimensiones en las que están definidos los datos y de manera **simultánea y objetiva** permita crear los *k* grupos que requerimos
+
+Requerimos dos condiciones que deben cumplirse de manera simultánea:
+
+* 1 - Similitud *dentro* de cada grupo
+* 2 - Disimilitud *entre los grupos* 
+
+Es decir, necesitamos que los individuos que conforman al grupo sean lo más similares entre si, es decir *entre individuos que comparten grupo*, al mismo tiempo, que cada uno de los grupos presente la mayor disimilitud con respecto a los demás *grupos*.
+
+Dado que apriori desconocemos la forma en que están formados los grupos (es justamente lo que buscamos) no contamos dentro del set de datos con una variable que guíe nuestros parámetros, por lo que este tipo de algoritmos cae en la categoría de *ALGORITMO NO SUPERVISADO*.
+
+# DATOS: ARREST
+
+Usaremos el set público *USArrests* que contiene los datos de arrestos policiales en 50 estados de USA catalogados en: Asalto, asesinato y violación.
+
+Los datos son expresados en cantidad de arrestos por cada 100mil residentes a fin de que sean comparables a través de los estados. Se incluye además el porcentaje de población que vive en areas urbanas.
+
+```{r CargaDatos001, Warning=FALSE, echo = TRUE}
+  #library(datarium)
+  df <- USArrests
+  DT::datatable(df,                    
+                rownames = TRUE, 
+                filter="top",
+                options = list(pageLength = 15, scrollX=T)
+                )
+```
+
+Como se mencionó anteriormente, queremos eliminar la influencia que una variable pueda tener por sobre las demás por el simple hecho de ser medida un una unidad distita, procediendo a estandarizar el conjunto de datos
+
+```{r CargaDatos002, Warning=FALSE, echo = TRUE}
+  #library(kableExtra)  
+  df <- scale(df)
+  dt=head(df,10)
+  kable(dt) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position ="left")#   "float_right")
+```
+
+# DISTANCIA  {.tabset .tabset-fade .tabset-pills}
+
+En el apartado inicial nos planteamos la tarea de definir grupos que estén **juntos** dentro del conjunto, pero **separados** entre los grupos, invocando de manera inmediata la noción de distancia entre observaciones. 
+
+Para nuestra intención debemos entonces crear un instrumento que guarde información sobre ese concepto de distancia. 
+
+Almacenaremos esta información de manera conveniente, en una matriz, a la que denominaremos matriz de distancias (doble puntaje por la creatividad!) que contendrá en cada una de sus entradas la distancia existente entre cada par de observaciones. Aun nos falta definir de manera explícita el concepto *distancia*.
+
+Varios son los planteamientos clásicos de distancia, siendo los más frecuentemente empleados las distancias *Euclídea* y *Manhattan*
+
+La escogencia de cada una de estas distancias, se relaciona con la naturaleza del problema y de los datos en cuestión. Cuando no se tiene claro este tema, lo más recomendable consiste en hacer uso de la distancia *Euclídea* teniendo claro siempre, que la elección entre una u otra métrica tendrá efectos en la conformación de los grupos. 
+
+## EUCLIDEA
+Distancia [Euclídea:](https://en.wikipedia.org/wiki/Euclidean_distance)
+
+```{r, out.width = "800px",fig.align="CENTER", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=IMG=paste0(CLASE01,"Pitagoras_Euclides.png")
+    knitr::include_graphics(IMG)
+```
+
+$d_{Euclidea}(x_i,y_i) = {\sqrt{\sum_{i=1}^{n}{(x{_i}-y{_i}}})^2}$
+
+en $R^{n}: d_{Euclidea}(x_i^m,x_i^n) = {\sqrt{\sum_{i=1}^{p}{(x{_i}^m-x{_i}^n}})^2}$
+
+## MANHATTAN
+Distancia [Manhattan: ](https://en.wikipedia.org/wiki/Taxicab_geometry)
+
+$d_{Manhattan}(x_i^m,x_i^n) = {\sqrt{\sum_{i=1}^{p}{|x{_i}^m-x{_i}^n}}|}$
+
+Adicionalmente nos encontramos de manera frecuente en la literatura con el planteamiento de Minkowski. 
+
+## MINKOWSKI
+Distancia [Minkowski :](https://en.wikipedia.org/wiki/Minkowski_distance)
+
+$d_{Minkowski}(x_i^m,x_i^n) = ({\sqrt{\sum_{i=1}^{p}{|x{_i}^m-x{_i}^n}}|})^{1/r}$
+
+# DISTANCIA EUCLIDEA en R
+
+A partir del uso del paquete *factoextra* la tarea computacional de las distancias se reduce sustanciamente al uso de un comando, basta con invocar la función *get_dist* para lograr nuestro objetivo pero además este paquete nos provee de una función para visualizar los resultados*fviz_dist*. 
+
+Pasemos a una sencilla ilustración, usando *get_dist* para el cómputo de nuestra matriz de distancias (por individuo). Por defecto la distancia empleada es la *Euclidea* pudiendo tambien emplear la *Manhattan* y la *Minkowski*; 
+
+```{r CargaDatos1, Warning=FALSE, echo = TRUE}
+  distance <- get_dist(df)
+print(distance)
+```
+
+La librería *fviz_dist* será empleada para visualizar la matriz de distancias resultante.
+
+```{r, out.width = "800px", CargaDatos2, Warning=FALSE, echo = TRUE}
+  fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+# K-MEDIAS   {.tabset .tabset-fade .tabset-pills}
+
+El algoritmo K-medias, siendo un clásico en la literatura, es uno de los algoritmos *no supervisados* mayormente empleados por su facilidad de implementación, asi como por su fácil comprensión. 
+
+Parte el problema de dividir el conjunto de datos en **K** grupos, todos disímiles entre sí y como mencionamos antes, similares en su interior. 
+
+El algoritmo usa por parámetro el elemento *K* que debe ser suministrado por el analista, siendo éste el único elemento o pista con que cuenta el algoritmo. 
+
+A partir de esa cantidad definida de grupos, el algoritmo procederá a crear una cantidad *K* de centroides a los que asociará cada una de las observaciones contenidas en la tabla *NP* de datos, asignando cada observación a aquel grupo cuya distancia sea menor con respecto al conjunto de centroides, es decir, elegirá aquel centroide que minimiza la distancia entre la obseravación y el centro. De esta forma, este centroide no es más que un promedio multidimensional, o centro de gravedad de cada grupo.
+
+## IDEA
+La idea básica que subyace detrás del algoritmo de *K-medias* consiste en definir una cantidad predefinida de clusters que cumplen con la condición simultánea de que la variacion **DENTRO DEL CLUSTER** es mínima, al tiempo que la variación **ENTRE ClUSTERS** es máxima. A la primer condición la denominaremos como **VARIACION INTRA CLUSTERS [ViC]** mientras que la segunda **VARIACION ENTRE CLUSTERS [VeC]** 
+
+La versión más popular de éste algoritmo se atribue a Hartigan-Wong (1979). En esta versión, se define la variación *ViC* como la suma de las distancias Euclideas de cada observación con respecto al centroide correspondiente:
+
+$W(C_k) = \sum_{i=1}^{n}{(x_i-\mu_k})^2$
+
+Donde:
+$x_i$ corresponde a la observación i-ésima en análisis 
+$mu_k$ corresponde al k-ésimo centroide 
+
+Cada observacion $x_i$ será asignada al cluster cuya suma cuadratica de distancia, con respecto a su centroide $mu_k$ sea mínima. 
+
+Se define la Variación intra Cluster *VIC* como:
+
+$VIC = W(C_k) = \sum_{k=1}^{k}\sum_{x_i \in C_k}{(x_i-\mu_k})^2$
+
+que dada la condición de similitud que buscamos entre los miembros de cada grupo, se traduce en obtener un VIC lo más reducido posible.
+
+## ALGORITMO
+
+k-medias, define de entrada un parámetro que a todas luces reviste una gran relevancia, el parámetro *K*. Éste es un parámetro que debe suministrar el analista, quien apriori define la cantidad *K* de grupos que pretende de sus datos. Definido éste parámetro, son seleccionados aleatoriamente k-puntos del conjunto de datos, asumiendolos como centroides iniciales. 
+
+Una vez definidos esos puntos iniciales, se computa la distancia de cada observación con respecto a esos centroides iniciales, en esta etapa, cada observación es asignada a un grupo inicial. Habiendo definido todos los grupos, se procede a actualizar el valor de los centroides. Habiendo recalculado los centroides, se revisa si al calcular las distancias nuevamente es necesario mover de grupo algunas observaciones. Habiendo completado la reasignación, se vuelven a computar los centroides. Se vuelven a recomputar las distancias y se evalúa si es necesario mover alguna observación, con el consecuente recomputo de centroides. El proceso continua hasta que se alcance algun grado de convergencia, o bien no sean necesarias más reubicaciones de observaciones en otros grupos.
+
+## RESUMEN  
+
+* 1- Seleccionar los K puntos en el espacio en el que "viven" los objetos que se quieren clasificar. Estos puntos representan los centroides iniciales de los grupos.
+* 2- Asignar cada objeto al grupo que tiene el centroide más cercano.
+* 3- Tras haber asignado todos los objetos, recalcular las posiciones de los K centroides.
+* 4- Repetir los pasos 2 y 3 hasta que los centroides se mantengan estables.
+
+Aunque se puede probar que este algoritmo siempre termina, no siempre la distribución que se alcanza es la óptima, ya que es muy sensible a las condiciones iniciales.
+
+## COMPUTO
+
+En *R* contamos con la implementación completa del algoritmo, por lo que basta invocar la función *kmeans*. 
+
+Iniciamos con la seleccion de K=2 para lo cual es necesario definir a *R* el parametro *k* que lo encontramos nombrado como 'centers'; de forma tal que para *k=2* (centers = 2). Adicionalmente y para sortear (al menos parcialmente) el problema asociado a la definicion de las condiciones iniciales, *R* nos permite repetir el proceso con distintas combinaciones de puntos de iniciaciónincluyendo para ello en la función el parametro *nstart* que en nuestro caso poblaremos con un valor de 25. Es decir evaluaremos 25 configuraciones iniciales, lo cual es altamente recomendo.
+
+```{r ComputarKmeans, Warning=FALSE, echo = TRUE}
+dfk3 <- kmeans(df, centers = 3, nstart = 25)
+str(dfk3)
+```
+
+de donde obtenemos los centros caracterizadores de los *k=2* grupos definidos
+
+```{r Computadfk2centros, Warning=FALSE, echo = TRUE}
+dfk3$centers
+```
+
+siendo el grupo 1, el grupo donde se manifiestan mayoritariamente los actos delictivos y el 2 su contraparte.
+
+Pero además, el objeto retorna una serie de información adicional a la que podemos tener acceso con solo llamar al objeto y agregar el simbolo *$*. Resultados contenidos en el objeto:
+
+* cluster:      Resultado de asignación de cada observación-
+* centers:      Centroides o valores medios
+* totss:        Suma total de cuadraros
+* withinss:     Suma de cuadrados *ViC* se incluyen tantos como *k*
+* tot.withinss: Suma de *ViC* equivlente a **sum(withinss)**
+* betweenss:    Suma de cuadrados *VeC* se incluyen tantos como *k*
+* size:         Total de elementos por cada cluster
+
+## EJEMPLO
+
+Cluster nos retorna la asignación de cada elemento, a modo de ejemplo, pidamos que nos muestre los primeros 5 individuos y el resultado de su clasificación
+
+```{r Computadfk2elementos, Warning=FALSE, echo = TRUE}
+  head(dfk3$cluster,5)
+```
+
+de donde podemos notar que Arkansas es el unico clasificado en el grupo de menor incidencia delictiva
+
+Estamos preparados entonces para mostrar el output completo:
+
+```{r Print001, Warning=FALSE, echo = TRUE}
+  print(dfk3)
+```
+
+La visualizaci[on gráfica puede reducir bastante el tiempo que dedicamos a la comprensión de resultados, que gracias a la implementación dispuesta en *R* resulta de mucha facilidad. Una bondad del paquete *factoextra* es que nos permite visualizar en un plano de dos dimensiones multiples dimensiones (más que 2) pues internamente utiliza en analisis de componentes principales [ACP]("https://es.wikipedia.org/wiki/An%C3%A1lisis_de_componentes_principales") retornando de manera visual el plano compuesto por los Componentes Principales 1 y 2 (los porcentajes indicados sumados, explican la porcion de varianza que absorven estos primeros componentes)
+
+```{r Graf001, out.width = "800px", Warning=FALSE, echo = TRUE}
+  factoextra::fviz_cluster(dfk3, data = df)
+```
+
+Como hemos notado, el algoritmo *k-medias* impone apriori la condicion de definición de la cantidad de grupos, por lo que la pregunta inmediata es: *Cual es el k "optimo"?*
+
+Una respuesta inmediata nos lleva a probar otros valores para el parámetro K a fin de contrastar la estabilidad de los resultados obtenidos, es decir, el "tanteo". Probemos entonces con valores para $k = {3,4,5}$
+
+y comparemos sus resultados...
+
+```{r Graf003, out.width = "800px", Warning=FALSE, echo = TRUE}
+  
+  dfk4 <- kmeans(df, centers = 4, nstart = 25)
+  dfk5 <- kmeans(df, centers = 5, nstart = 25)
+  dfk6 <- kmeans(df, centers = 6, nstart = 25)
+  
+  p1 <- factoextra::fviz_cluster(dfk3, geom = "point",  data = df) + ggtitle("k = 3")
+  p2 <- factoextra::fviz_cluster(dfk4, geom = "point",  data = df) + ggtitle("k = 4")
+  p3 <- factoextra::fviz_cluster(dfk5, geom = "point",  data = df) + ggtitle("k = 5")
+  p4 <- factoextra::fviz_cluster(dfk6, geom = "point",  data = df) + ggtitle("k = 6")
+  
+  gridExtra::grid.arrange(p1, p2, p3, p4, nrow = 2)
+
+```
+
+El gráfico nos sugiere otras configuraciones de grupos, pero no nos dice nada de cual de ellos es mejor.
+
+## *K* OPTIMO  {.tabset .tabset-fade .tabset-pills}
+
+Dado que no queremos depender de la suerte del analista y su definición inicial de *k* nos centraremos en pensar en un criterio objetivo que nos permita decidir objetivamente el valor de k. 
+
+### CODO
+
+Recordemos que la idea del algoritmo se basa en particionar datos, haciendo que dicha particion se la menor intra grupo (ViC)
+
+$Minimizar: \sum_{k=1}^{k} W(C_k)$
+
+Donde $C_k$ es el $k^{ésimo}$ clúster y $W(C_k)$ la Variación Intra Cluster *ViC*. 
+
+Si es que sumamos la variación interna *SVic* (algo similar a la suma de errores cuadrados de Regresión lineal) definimos una métrica que podemos fijar como objetivo, particularmente hacerla lo más pequeña posible. A partir de esta metrica, podemos entonces definir un criterio de selección para la cantidad de cluster *K*.
+
+El algoritmo para nuestra tarea consiste en:
+
+* 1- Computar el algoritmo de K-Medias para distintos valores de k
+* 2- Para cada k, computar la suma de variaciones intra cluster *SViC* 
+* 3- Graficar los distintos valores *SViC* obtenidos para cada *K* 
+* 4- Visualizar el punto donde la curva presenta un *codo* ( o variacion severa de pendiente)
+
+Este algoritmo -como era de esperar- ya se encuentra implementado en *R* en la función *fviz_nbclust*
+
+```{r Graf004, Warning=FALSE, echo = TRUE}
+  set.seed(123)
+  factoextra::fviz_nbclust(df, kmeans, method = "wss")
+```
+
+### BRECHA (gap)
+
+Publicado por R. Tibshirani, G. Walther, and T. Hastie (Stanford University, 2001) [ver documento]("https://statweb.stanford.edu/~gwalther/gap"). 
+
+Este metodo puede ser emplado en otros metodos de clasificacion(i.e. K-means clustering, hierarchical clustering) consiste en comparar la variación total intra cluster *SViC* para distintos valos de *k* con valores de referencia de una distribución nula de los datos (por ejemplo si agrupaciones).
+
+El conjunto de datos de referencia se construye a partir de simulaciones [Monte Carlo]("https://es.wikipedia.org/wiki/M%C3%A9todo_de_Montecarlo") en el proceso de muestreo, de forma tal que cada variable $x_i$ en el conjunto de datos, pertenece al intervalo $I=[min(x_i), max(x_i)]$ generando *n* valores distribuídos uniformemente en el intervalo $I$.
+
+Para los datos observados y los de referencia, se computa el *ViC* para distintos valores *k* con los que se procede a computar el *GAP* entre uno y otro grupo:
+
+$Gap_n(k)=E_n log(W_k) + log(W_k)$
+
+$E_n^*$:  Valor esperado en la muestra de referencia, siendo definido via proceso *B* de [bootstrapping]("https://es.wikipedia.org/wiki/Bootstrapping_(estad%C3%ADstica)") en el que se generan B copias del conjunto de datos de referencia para el que se computa el promedio $log(W_k^*)$. 
+
+El *GAP* mide la desviación entre el valor $W_k$ observado y el valor esperado bajo la hipotesis nula.
+
+El valor estimado de cantidad optima de grupos *K* $\hat k$  corresponderá a aquel *K* que maximiza el valor $Gap_n(k)$, lo que implica que la estructura de agrupamiento está lejos de una estructura de distribucupib uniforme de observaciones.
+
+En síntesis:
+
+* 1- Agrupar los datos variando el parametro *K* $k= 1, \dots, k_{max}$ computando el correspondiente $W_k$
+* 2- Generar *B* conjuntos de datos de referencia y agrupar cada uno de ellos variando el número *k* de grupos $k= 1, \dots, k_{max}$. Computar: $Gap_n(k)=E_n log(W_k) + log(W_k)$
+* 3- Sea $\hat w = {\frac {1}{B} \sum_{b} log(W_{kb}^*)}$ compute la desviacion estandar $sd(k)= \sqrt {\frac {1}{B} \sum_{b} log(W_{kb}^*-\hat w)^2}$ defina $s_k=s_d \sqrt{1+\frac{1}{B}}$
+* 4- Escoja el numero de clusters con el menor *k* tal que: 
+
+$Gap(k) >= Gap(k+1) - S_{k+1}$
+
+> Ahora bien, en *R* basta con invocar la funcion *clusGap* que junto con la función *fviz_gap_stat* nos permitirá visualizar los resultados. Ahora bien, si queremos acceder a más opciones para elegir K en la libreria NbClust publicada por Charrad et al., 2014 se incorporan cerca de 30 indices adicionales pare esta misma tarea
+
+
+```{r Graf005, Warning=FALSE, echo = TRUE}
+  set.seed(123)
+  gap_stat <- cluster::clusGap(df, FUN = kmeans, nstart = 25,K.max = 10, B = 50)
+  print(gap_stat, method = "firstmax")
+``` 
+
+```{r Graf006, Warning=FALSE, echo = TRUE}
+  factoextra::fviz_gap_stat(gap_stat)
+``` 
+
+## RESULTADOS
+
+Los datos sugieren una cantidad *K=4* como número optimo de grupos, por lo que podemos fijar el análisis final como:
+
+```{r Graf007, warning=FALSE, echo = TRUE}
+  set.seed(123)
+  final <- kmeans(df, 4, nstart = 25)
+  print(final)
+``` 
+
+y obtener de ellos su visualización a partir de *fviz_cluster*:
+
+```{r Graf008, warning=FALSE, echo=TRUE}
+  factoextra::fviz_cluster(final, data = df)
+``` 
+
+```{r Graf009, include=FALSE, echo=TRUE, warning=FALSE}
+  USArrests %>%
+    mutate(Cluster = final$cluster) %>%
+    group_by(Cluster) %>%
+    summarise_all("mean")
+``` 
+
+# COMENTARIOS
+
+Como pudo observarse el algoritmo de *K-Medias* por su facilidad de implementación, facilita la agrupación grandes bloques de datos en unos pocos grupos. Su mayor debilidad reside en el hecho de depender de un parámetro arbitrario *K* que lo hace dependiente de criterios arbitarios debilitando su potencia. Algunas técnicas han sido propuestas para mejorar esta debilidad, favoreciendo al algoritmo. 
+
+Otras técnicas están exentas de esta debilidad, entre ellas la definición de clusters jerarquicos, basados en la idea de *árboles de decisión* que al no requerir de entrada la imposición de un parámetro pueden conducir a resultados con menor sesgo de analista.
+
+Un segundo elemento que introduce ruído en la construcción de los grupos es la existencia de valores extremos en los datos, conduciendo a grupos disimiles dentro de si. Para ello algunas técnicas han planteado el uso de los *medioides* que reducen la sensibilidad del algoritmo a la presencia de valores extremos (conocidos como [k-Medoids]("https://es.wikipedia.org/wiki/K-medoids")) 
+
+# TRABAJO 01
+
+> Pronto las especificaciones, por ahora, leer capítulo 2
+
+```{r, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+xfun::embed_file('WHR19.pdf')
+```
+
+```{r, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+xfun::embed_file('Happiness.LAB.csv')
+```
+
+# ANEXOS
+
+## ANEXO 01
+
+```{r, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+xfun::embed_file('TEMA001_Kmedias.xlsx')
+```

@@ -1,0 +1,882 @@
+---
+title: "Especialidad CD: Multivariante I"
+author: "Minor Bonilla Gómez"
+date: "minor.bonilla@ulead.ac.cr"
+output:
+  rmdformats::material:
+    highlight: kate
+    self_contained: true
+    code_folding: show
+    thumbnails: true
+    gallery: true
+    fig_width: 4
+    fig_height: 4
+    df_print: kable
+---
+
+```{r echo_f, include=FALSE, message=FALSE, warning=FALSE}
+
+  knitr::opts_chunk$set(echo = FALSE)
+  CLASE00="F:/LEAD/2020/ESS/002 IMAGENES/CL00/"  
+  CLASE01="F:/LEAD/2020/ESS/002 IMAGENES/CL01/"
+  PONENCIA="F:/BKLLB/PONENCIAS ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/IMAGENES/"
+  RUTAACTUAL="F:/LEAD/2020/ESP/CLASES/0002/"
+  
+```
+
+```{r, echo=FALSE, out.width = "400px",fig.align="left", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"CIPAD-Logo.png")
+    knitr::include_graphics(IMG)
+```
+
+<!------------FORMATO--------------->
+
+<style>
+      .page {
+            transform: translateY(1080px);
+            transition: transform 0 linear;
+            visibility: hidden;
+            opacity: 0;
+            font-size: 20px;
+            margin-left: 1em;
+            }
+      .pages h1 {
+                color: #f5b815;
+                font-style: bold;
+                margin-top: 5px;
+                }
+      .header-panel h4.date {
+                            font-size: 16px;
+                            color: #f5b815;
+                            padding-left: 35px;
+                            margin: 5px 0px;
+                            font-style: bold;
+                            }
+        a, a:focus, a:hover {
+                            color: #99a83d;
+                            }                            
+      body {
+            text-align: justify
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #28105E;
+            background-color: #fff;
+           }
+    .header-panel {
+                  background-color: rgb(33, 44, 85);
+                  min-height: 144px;
+                  position: relative;
+                  z-index: 3;
+                }
+    .panel {
+            margin-bottom: 20px;
+            background-color: rgba(255,255,255,0);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0);
+            box-shadow: 0 1px 1px rgba(0,0,0,0);
+          } 
+    body .container .jumbotron, 
+    body .container .jumbotron-default, 
+    body .container .well, 
+    body .container .well-default, 
+    body .container-fluid .jumbotron, 
+    body .container-fluid .jumbotron-default, 
+    body .container-fluid .well, 
+    body .container-fluid .well-default {
+                                        background-color: #e6e2e2;
+                                        }        
+    .nav-pills>li.active>a,
+    .nav-pills>li.active>a:focus, 
+    .nav-pills>li.active>a:hover {
+                                  color: #fff;
+                                  background-color: rgb(33, 44, 85);
+                                  }
+    .nav-pills>li>a {
+                     border-radius: 4px;
+                    }
+    .nav>li>a {
+              position: relative;
+              display: block;
+              padding: 10px 15px;
+              }
+    a, 
+    a:focus, 
+    a:hover {
+              color: #093e39;
+            }
+    .menu ul li a {
+                  color: rgb(51, 51, 51);
+                  text-decoration: none;
+                  }        
+            
+</style>
+
+<!------------CONTENIDO--------------->
+
+# {.tabset .tabset-fade .tabset-pills}
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(PONENCIA,"Fractal Loop 2.gif")
+    knitr::include_graphics(IMG)
+```
+
+# LIBRERIAS
+
+```{r librerias, include=TRUE, message=TRUE, warning=FALSE, echo=TRUE}
+
+# Dado que algunas de estas librerias podrían no estar instaladas en nuestra máquina, resulta de suma 
+# importancia instalarlas antes -de ser necesario-; para ello usaremos el comando *install.packages* que 
+# en nuestro caso particular: install.packages("NOMBRE_LIBRERIA")
+  
+ suppressPackageStartupMessages( library('mvtnorm'))
+ suppressPackageStartupMessages( library('ggplot2'))
+ suppressPackageStartupMessages( library('GGally'))
+
+ suppressPackageStartupMessages( library('magrittr'))
+ suppressPackageStartupMessages( library('kableExtra'))
+
+ suppressPackageStartupMessages( library('readxl'))
+ suppressPackageStartupMessages( library('MASS'))
+ suppressPackageStartupMessages( library('knitr'))
+ suppressPackageStartupMessages( library('FactoMineR'))
+ suppressPackageStartupMessages( library('factoextra'))
+ suppressPackageStartupMessages( library("corrplot"))
+
+ suppressPackageStartupMessages( library('plotly'))
+ suppressPackageStartupMessages( library('xfun'))
+
+```
+
+# INTRODUCCIÓN {.tabset .tabset-fade .tabset-pills}
+
+## Individuos
+
+Damos un salto en la dirección del espacio de las variables. Hasta ahora nos hemos enfocado en los individuos, pero daremos ahora cabida a las variables y a sus eventuales interacciones (y ambos!) 
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva1.png")
+    knitr::include_graphics(IMG)
+```
+
+## Variables
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva2.png")
+    knitr::include_graphics(IMG)
+```
+
+Vale la pena hacerse entonces preguntas sobre los nuevos actores; son esas variables relevantes? Cuales? En qué direccion?
+
+Nos abocaremos a comprender las relaciones entre las variables y a partir de esas relaciones, trataremos luego de dirigirnos en la dirección de la reducción de dimensiones. Para ello nos estudiaremos el Análisis de Componentes Principales (ACP).
+
+ACP es una técnica popularmente empleada en las etapas iniciales del proceso de modelación de datos, principalmente cuando se pretende obtener información de la varianza el conjunta del conjunto de datos, mismo que buscamos transformar a través del propio proceso. De esta forma, tenemos un objetivo claro: Maximizar la extracción de información de nuestros datos.
+
+**PARSIMONIA** 
+
+> En igualdad de condiciones, la explicación más sencilla suele ser la más probable. 
+  Esto implica que, cuando dos teorías en igualdad de condiciones tienen las mismas 
+  consecuencias, la teoría más simple tiene más probabilidades de ser correcta que la compleja
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Navaja_de_Ockham'>
+</iframe>
+
+Así las cosas, queremos reducir (la cantidad de dimensiones) sin perder información relevante.
+
+# VARIABLES ALEATORIAS {.tabset .tabset-fade .tabset-pills}
+
+> Una variable aleatoria puede concebirse como un valor numérico que está afectado por el azar. Dada una variable aleatoria   no es posible conocer con certeza el valor que tomará esta al ser medida o determinada, aunque sí se conoce que existe una   distribución de probabilidad asociada al conjunto de valores posibles. Por ejemplo, en una epidemia de cólera, se sabe que   una persona cualquiera puede enfermar o no (suceso), pero no se sabe cuál de los dos sucesos va a ocurrir. Solamente se     puede decir que existe una probabilidad de que la persona enferme.
+(Tomado de Wikipedia, ver anexo)
+
+> * Momentos 1 y 2
+> * Media Condicional
+> * X ya no es determinística
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Variable_aleatoria'>
+</iframe>
+
+
+## DATOS ARTIFICIALES
+
+Para esta sección emplearemos el paquete `mvtnorm` que contiene múltiples herramientas para la generación de conjuntos de datos con distribuciones multinormales
+
+Usaremos la función `rmvnorm` que requiere por parámetros:
+
+```{r, out.width = "800px", echo=TRUE, warning=FALSE}
+  require(mvtnorm)
+  library(kableExtra)
+
+  set.seed(123456789)
+
+# Vamos a generar dos variables, cada una con 100 observaciones
+# si quieren pueden hacerlo BIG!
+  
+# 1. Cantidad de observaciones a crear (*n*) 
+  N=100 
+
+ 
+# 2. Vector de promedios (tantas como variables a crear)
+  PROMEDIOS=c(0, 2.5, -2)
+
+# 3. Matriz de covarianzas (pXp)  
+  CORRELACION=matrix(c(1.5,-1.1,0,-1.1,2,0.5,0,0.5,3), nrow=3, ncol=3)
+  
+  Datos = mvtnorm::rmvnorm(n=N, mean=PROMEDIOS, sigma=CORRELACION)
+  
+  Datos = data.frame(Datos)
+  Datos <- as.data.frame(Datos)
+  
+# Nombrando las variables (no había premio por cretividad)  
+  colnames(Datos)=c("X","Y","Z")
+
+# Almacenando los datos en algunas variables locales    
+  X=Datos[,1]
+  Y=Datos[,2]
+  Z=Datos[,3]
+
+# Solicitando un TOP 10 de los datos generados    
+  dt=head(Datos, 10)
+
+# Usando la libreria kable para generar una tabla esteticamente bonita    
+  kable(dt) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position ="center")#   "float_right")
+  
+# Solicitando los valores promedio de las variables generadas aleatoriamente  
+  colMeans(Datos)
+
+# Solicitando la varianza    
+  var(Datos)
+
+```  
+
+## VISUALIZANDO
+
+```{r, out.width = "800px", echo=TRUE, warning=FALSE}
+# Usando la libreria plotly para un generar una visalización interactiva en 3d  
+  plotly::plot_ly(Datos, x = ~X, y = ~Y, z= ~Z, alpha = 0.4)%>%
+          add_markers(marker = list(line = list(color = "black", width = 0.25)))
+  
+```
+
+# VAR-COV {.tabset .tabset-pills .tabset-fade}
+
+DOS VARIABLES $(X_{1}, X_{2})$
+
+La covarianza indica el grado de variación conjunta de dos variables aleatorias respecto a sus medias, permitiendonos determinar si existe algun grado dependencia entre ambas variables. 
+
+$$
+s_{X_{1}X_{2}}=\sum_{i=1}^n{\frac{(x_{i,1}-\mu_{x_{1}})(x_{i,2}-\mu_{x_{2}})}{n}}
+$$
+
+$$
+ \mathbf s_{X_{1}X_{2}}:
+  \begin{cases}
+    >0   & \quad \text{covarían en la misma dirección}\\
+    =0   & \quad \text{no se observa evidencia de relación entre }(X_{1}, X_{2})\\
+    <0   & \quad \text{covarían en dirección opuesta}\\
+  \end{cases}\
+$$
+
+MAS DE DOS VARIABLES $(X_{1}, X_{2}, X_{3},..., X_{p})$
+
+Su importancia es de elevada relevancia en el análisis de datos, pues es necesaria para estimar otros parámetros básicos, como el coeficiente de correlación lineal u obtener los coeficientes asociados a la regresión.
+
+$$\mathbf {s} = \left[\begin{array}
+{rrr}
+cov(x_1, x_1) & cov(x_1, x_2) & cov(x_1, x_3) & ... & cov(x_1, x_p) \\
+cov(x_2, x_1) & cov(x_2, x_2) & cov(x_2, x_3) & ... & cov(x_2, x_p) \\
+... & ... & ... &  ... & ...\\
+cov(x_p, x_1) & cov(x_p, x_2) & cov(x_p, x_3) & ... & cov(x_p, x_p) \\
+\end{array}\right]$$
+
+notar que 
+
+$$~cuando~m \neq n\\
+| \\
+s_{X_{i}X_{2}}=\sum_{i=1}^n{\frac{(x_{(i,m)}-\bar{x}_{m})(x_{(i,n)}-\bar{x}_{n})}{N}} \\
+| \\
+pero~cuando~m=n\\
+| \\
+s_{X_{1}X_{2}}=\sum_{i=1}^n{\frac{(x_{(i,m)}-\bar{x}_{m})^2}{N}}\\
+| \\
+por~lo~que\\
+| \\
+cov(X^m, X^n) = var(X^m) \\
+$$
+por lo que:
+
+$$\mathbf{s} = \left[\begin{array}
+{rrr}
+var(x_1) & cov(x_1, x_2) & cov(x_1, x_3) & ... & cov(x_1, x_p) \\
+cov(x_2, x_1) & var(x_2) & cov(x_2, x_3) & ... & cov(x_2, x_p) \\
+... & ... & ... &  ... & ...\\
+cov(x_p, x_1) & cov(x_p, x_2) & cov(x_p, x_3) & ... & var(x_p) \\
+\end{array}\right]$$
+
+
+## Covarianza: Matrices {.tabset .tabset-pills .tabset-fade}
+
+Procedamos a realizar algunas observaciones y algunos cálculos para poder comprender a mayor detalle el instrumento.
+
+### Centrado, Escalado y Normalización
+
+Comúnmente como primer paso en el proceso de ACP, resulta necesario centrar y normalizar los datos, dado que el análisis de ACP es sensible a las magnitudes de las variables. Esto toma importancia cuando nuestro set contiene datos medidos en diversas unidades. Así las cosas y dado que nuestro objetivo es explicar varianza, podríamos resultar siendo víctimas de asignar importancia a variables no por su aporte, sino por su unidad de medida.
+
+Algunos métodos de escalamiento:
+
+| Método de Escalamiento | Fórmula |
+| :--------------------- | :-------------------------------------------------------------------------: |
+| Centrado | $\large f(x) ~=~ x - \bar x$ |
+| Escalamiento Unitario [0, 1] | $\large f(x) ~=~ \frac {x - min(x)} {max(x) - min(x)}$ |
+| Escalamiento Intervalo [a, b] | $\large f(x) ~=~ (b - a)* \Large \frac {x - min(x)} {max(x) - min(x)} + a$ |
+| Normalización | $\large f(x) ~=~ \frac {(x - \bar x)} {\sigma_x}$ |
+
+### Covarianza: 2 variables {-}
+
+Para dos variables el cálculo es bastante simple y puede realizarse "a pie" a partir de:
+
+$$COV_{(X_{i},X_{2})}=S_{(X_{i},X_{2})}=\sum_{i=1}^n{\frac{(x_{(i,m)}-\bar{x}_{m})(x_{(i,n)}-\bar{x}_{n})}{N}} \\$$
+
+### Covarianza >2 Variables {-}
+
+Pero claramente enfrentamos en la realidad cotidiana casos de mayores a dos variables, para ello recurriremos a algunos elementos de cálculo matricial, que haran el proceso mucho más eficiente para nosotros (que llenar cada una de las entradas de la matriz *pxp*)
+
+Sea $\large X_{(n,p)}$ nuestra tabla de datos
+
+1. Obtenga los valores promedio de cada variable $\bar{X}=X_{promedio}$.
+2. Compute la matriz de datos centrados $D ~=~ X - \bar{X}$.
+3. La matriz de covarianza estará dada por:
+
+$$COV ~ (X) ~=~ \left( \frac{1}{N-1} \right) ~ D^T \cdot D $$
+
+siendo $D^T$ la matriz transpuesta de $D$ con 
+$$ D = X - \bar{X}$$
+
+
+### Var-Cov: Ejemplo  {-}
+
+#### PASO A PASO
+
+```{r, echo=TRUE}
+    cov(Datos$X, Datos$X) 
+    cov(Datos$Y, Datos$Y) 
+    cov(Datos$Z, Datos$Z) 
+    cov(Datos$X, Datos$Y) 
+    cov(Datos$Y, Datos$X) 
+    cov(Datos$X, Datos$Z) 
+    cov(Datos$Z, Datos$X)   
+    cov(Datos$Z, Datos$Y) 
+    cov(Datos$Y, Datos$Z) 
+```
+
+#### CON ÁLGEBRA
+
+```{r, echo=TRUE}
+
+  Datos.escalado=scale(Datos, center=TRUE, scale=FALSE )
+  
+  # Cantidad de Datos
+  n=nrow(Datos.escalado)
+  print(n)
+  
+  # Recuerde que COV(X)=(1/(N-1))*Dt*D
+  Cov.aPata= t(Datos.escalado) %*% Datos.escalado
+  
+  1/(n-1)*Cov.aPata
+  
+  #O bien está la opcion de usar las funciones internas
+  cov(Datos)
+  
+```
+
+```{r, echo=TRUE}
+    xfun::embed_file(paste0(RUTAACTUAL,'TEMA002_ACP_DS.xlsx'))
+```
+
+## Correlación {.tabset .tabset-pills .tabset-fade}
+
+Ahora bien, dado que la matriz de covarianzas puede estar influenciada por el nivel de medición -si es que olvidamos estandarizar las variables por su desviación estándar- de una u otra variable, sus comparaciones no resultan inmediatas. De ahi, que requerimos un indicador que nos permita realizar comparaciones directas entre pares de variables. 
+
+Nace la noción de correlación, que no es más que una relativización de la matriz de Varianzas y Covarianzas. 
+
+Basta entonces realizar un simple ajuste y tenemos que:
+
+$CORR(X^m,X^n) = \frac{COV(X^m,X^n)}{\sigma{(X^m)}\cdot\sigma{{(X^n)}}}$
+
+lo que nos permite tener una medida además restringida en el intervalo [-1, 1] de esta forma
+
+$$  CORR(X_m,X_n)  :
+    \begin{cases}
+      \in \text{ } ]0,1]  & \quad \text{la relación entre variables es positiva}\\
+      =0  \text{ }        & \quad \text{no se observa evidencia de relación entre } (X_{m}, X_{n})\\
+      \in \text{ } [-1,0[ & \quad \text{las variables presentan relación inversa}\\
+    \end{cases}
+$$
+
+### A PIE
+
+```{r, echo=TRUE}
+
+# cuando m=n:
+  cov(Datos$X, Datos$X) / (sd(Datos$X) * sd(Datos$X))
+  cov(Datos$Y, Datos$Y) / (sd(Datos$Y) * sd(Datos$Y))
+  cov(Datos$Z, Datos$Z) / (sd(Datos$Z) * sd(Datos$Z))
+
+# cuando m<>n:  
+  cov(Datos$X, Datos$Y) / (sd(Datos$X) * sd(Datos$Y))
+  cov(Datos$Y, Datos$X) / (sd(Datos$Y) * sd(Datos$X))
+  cov(Datos$X, Datos$Z) / (sd(Datos$X) * sd(Datos$Z))
+  cov(Datos$Z, Datos$X) / (sd(Datos$X) * sd(Datos$X))  
+  cov(Datos$Z, Datos$Y) / (sd(Datos$Z) * sd(Datos$Y))
+  cov(Datos$Y, Datos$Z) / (sd(Datos$Y) * sd(Datos$Z))
+```
+
+### En R
+
+no obstante $\large{R}$ nos facilita una forma inmediata de cálculo a partir del uso de la funcion *cor*
+
+```{r, echo=TRUE}
+
+  # Si los datos son escalados:
+  Datos.escalado=scale(Datos, center=TRUE, scale=TRUE )
+  cov(Datos.escalado)
+  
+  # O bien:
+  cor(Datos)
+```
+
+pero además, nos facilita algunos aspectos visuales que son más que necesarios en nuestra exploración de datos
+
+```{r, out.width = "800px", echo=TRUE}
+  pairs(Datos)
+  GGally::ggpairs(Datos, )
+```
+
+# ANÁLISIS DE COMPONENTES PRINCIPALES (ACP)  {.tabset .tabset-pills .tabset-fade}
+
+Volviendo al principio de la parsimonia, queremos reducir la dimensionalidad. Para ello requerimos un proceso que permita objetivamente llevar a cabo esta tarea. 
+
+El ACP es un proceso de transformación de los datos, en que nuevas variables (Componentes Principales *CP*) contienen información de las múltiples dimensiones.
+
+## VISUAL  {.tabset .tabset-pills .tabset-fade}
+
+### IMG0000
+
+Requerimos adelgazar X a travé de alguna combinación lineal 
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva3.png")
+    knitr::include_graphics(IMG)
+```
+
+### IMG000
+
+Requerimos adelgazar X a travé de alguna combinación lineal 
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva4.png")
+    knitr::include_graphics(IMG)
+```
+
+### IMG00
+
+Requerimos adelgazar X a travé de alguna combinación lineal 
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva5.png")
+    knitr::include_graphics(IMG)
+```
+
+
+### IMG0
+
+Requerimos adelgazar X a travé de alguna combinación lineal 
+
+```{r, out.width = "800px", fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva2.png")
+    knitr::include_graphics(IMG)
+```
+
+### IMG1
+
+Nuestro problema consiste en proyectar los puntos en $ \large {R}^n $ sobre un plano
+
+
+```{r, out.width = "900px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Proyeccion00.jpeg")
+    knitr::include_graphics(IMG)
+```
+
+Un libro que bien vale la pena estudiar
+
+```{r, out.width = "450px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"AnalisisMultivariado.jpg")
+    knitr::include_graphics(IMG)
+```
+
+### IMG2
+
+```{r, out.width = "900px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE00,"PCA.gif")
+    knitr::include_graphics(IMG)
+```
+
+### IMG3
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://setosa.io/ev/principal-component-analysis/'>
+</iframe>
+
+## RESOLUCION*
+
+$$ 
+\text{Sea R la matriz de correlaciones y } u \text{ un vector unitario}\\
+Max:~ u^tRu \\
+sujeto~a: ||u||^2=u^tu=1 \\
+-LAGRANGE-\\
+L(u,\lambda)=u^tRu-\lambda (u^tu-1) \\
+\frac {\delta L}{\delta \lambda}=2Ru-2\lambda u=0 \\
+Ru=\lambda u
+$$
+lo que convierte al problema en un problema de diagonalización de la matriz de correlaciones (cuadrada), es decir estamos interesados en obtener los valores propios $\lambda$ y los vectores propios $u$ asociados con la igualdad.
+
+$$Ru=\lambda u$$
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src=https://es.wikipedia.org/wiki/Vector_propio_y_valor_propio#:~:text=El%20vector%20rojo%20es%20entonces,con%20el%20mismo%20valor%20propio.'>
+</iframe>
+
+Uno de los resultados más interesantes viene dado por:
+
+$$CP_{1}= \psi_{(1,1)}X_{1}+\psi_{(2,1)}X_{2}+...+\psi_{(p,1)}X_{p} \\
+\text{pero requeríamos que:}\\
+||u||^2=1\\
+\text{por lo que}\\
+\sum_{j=1}^p \psi_{(j,1)}^2=1$$
+
+## PROPIEDADES
+
+Algunas propiedades de los CPs hacen que esta metodología sea deseable para procesos posteriores, entre ellas la ortogonalidad entre los pares de Componentes. 
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Ortogonalidad_(matem%C3%A1ticas)'>
+</iframe>
+
+Otra característica de gran relevancia, consiste en la forma en que es almacenada la información o varianza del conjunto de datos, pues ésta, es almacenada de manera natural en los primeros *q* componentes de nuestras *P* dimensiones (notar que q<P), de forma tal que bastan *q* componentes para retener una cantidad importante de información de los datos, reduciendo en *P-q* dimensiones el espacio de las variables.
+
+Así las cosas, cada CP puede ser interpretado geométricamente como los vectores dirección de los datos en sus *q* dimensiones, haciendo que la variabilidad del conjunto completo de datos sea proyectado en un espacio de menor dimensión (han visto televisión?)
+
+## INTUICION {.tabset .tabset-fade .tabset-pills}
+
+Cada vector propio no es más que un conjunto de ponderadores de nuestras variables (de ahí que las *P* variables son ponderadas y sumadas para obtener una nueva variable que le llamamos Componente Principal)
+
+Esta es una guía para el usuario que pretende hacer uso del **Análisis de Componentes Principales**. Como guía, no pretende ser un análisis exhaustivo en la teoría que subyace detrás del instrumento. 
+
+Objetivos 
+
+>1. Identificar la interacción de las variables en la dinámica del sistema
+>
+>2. Reducir la dimensionalidad de los datos
+>
+>3. Reducir la redundancia en los datos
+>
+>4. Filtrar parte del ruído presente en los datos
+>
+>5. Comprimir los datos
+
+### Ventajas
+
+1. Preserva la estructura global de las observaciones
+
+2. Altamente eficiente para conjuntos de datos grandes
+
+3. Puede evidenciar la importancia de algunas variables en el conjunto entero
+
+### Desventajas
+
+1. Puede sufrir con problemas de escala
+
+2. Sensible a datos extremos
+
+3. Puede no ser inmediatamente intuititivo
+
+### Proceso 
+
+No obstante -y a riesgo de perder absoluta formalidad- podríamos sobre simplificar el proceso describiéndolo en unos pocos pasos (cada uno de ellos conteniendo una cantidad importante de conocimiento)
+
+* 1 - Centrar los datos con respecto a su promedio  
+* 2 - Computar la Matriz de Varianzas y Covarianzas [*MVC*]  
+* 3 - Obtener los Valores $\lambda=[\lambda_{1},\lambda_{2}, ..., \lambda_{p}]$ y Vectores Propios    $V=[v_{1}, v_{2}, ..., v_{p}]$ de *MCV*  
+* 4 - Seleccionar los *K* Valores Propios que más aportan a explicar la varianza tal que $\text {APORTE a la VARIANZA}= \frac{v_{1} + v_{2} + ... + v_{k}}{\sum_{i=1}^{p} v_{i}}$
+* 5 - Proyectar la matriz de datos X en el subespacio de las variables, para los k-componentes seleccionados $X_{Transformado = V_{K}^t X}$ (Como nota, basta con premultiplicar a los datos transformados por $V_{K}$ para recuperar los valores originales de X $V_{K}X_{Transformado} = V_{K}V_{K}^t X=X$ ... Eso es sexi!)
+
+### Herramientas Visuales  {.tabset .tabset-fade .tabset-pills}
+
+Dos gráficas, son ampliamente empleadas para determinar la cantidad de *componentes* que el analista define como relevantes o al menos aceptable.
+
+Los valores propios obtenidos del ACP están directamente relacionados con la varianza que represenar, tanto, que la suma de los valores propios $\sum_{i=1}^{p}\lambda_{i}=p$ ... Y esto es grandioso!
+
+#### Screeplot
+
+El Screeplot muestra el valor del valor propio (asociado al vector propio). Su interpretación inmediata se relaciona con el valor = 1. Cada valor propio con valor superior a dicho valor, indica un aporte de varianza mayor que el observado en los datos sin transformar.
+
+#### Porción Acumulada de Varianza
+
+El segundo elemento describe la porción de varianza acumulada por el componente principal en cuestión, esto a partir de:
+
+$$Porción~Acumulada~de~Varianza ~=~ \frac{\sigma_i^2}{\sum_{i=1}^N \sigma_i^2}$$
+
+###  Conclusiones
+PCA es una excelente opción en el proceso de análisis exploratorio de los datos. Uno de sus principales objetivos, es filtrar el ruido presente en los datos, para poder quedarse con la melodía de ellos.
+
+# EJEMPLO ACP: USA Arrest{.tabset .tabset-fade .tabset-pills}
+
+Continuaremos con los datos de USArrest (para dar continuidad a nuestra clase de k-Medias)
+
+Lo primero que haremos es limpiar la memoria 
+```{r}
+  rm(list=ls())
+```
+## CONJUNTO DE DATOS
+
+```{r,warning=FALSE, echo=TRUE, warning=FALSE}
+  library(datarium)
+  df <- USArrests
+  DT::datatable(df,                    
+                rownames = TRUE, 
+                filter="top",
+                options = list(pageLength = 15, scrollX=T)
+                )
+```
+
+## ESTADISTICAS DESCRIPTIVAS
+
+```{r, echo=TRUE, warning=FALSE}
+  summary(df)
+```
+
+## MATRIZ VISUAL
+
+```{r, echo=TRUE, warning=FALSE, out.width = "800px"}
+pairs(df)
+```
+
+## TABLA (n,p)
+Procedemos a contar la cantidad de registros [*N*], así como la cantidad de dimensiones [*P*]
+Cantidad de Individuos
+```{r, echo=TRUE, warning=FALSE}
+  n <- nrow(df)
+  p <- ncol(df)
+  
+  R=paste("Cantidad de Individuos: [", n, "] Cantidad de Variables: [",p,"]")
+  print(R)
+```
+
+## VARCOV {.tabset .tabset-fade .tabset-pills}
+
+#### **NO** ESCALADOS
+Covarianzas:
+```{r, echo=TRUE, warning=FALSE}
+  cov(df)
+```
+
+Correlaciones:
+```{r, echo=TRUE, warning=FALSE}
+  cor(df)
+```
+
+### **ESCALADOS**
+Notar que el escalamiento sólo afecta a la matriz de COVARIANZAS no así a la de Correlaciones, esto pues no hemos modificado la estructura de los datos con el escalamiento
+
+Covarianzas:
+```{r, echo=TRUE, warning=FALSE}
+  cov(scale(df))
+```
+
+Correlaciones:
+```{r, echo=TRUE, warning=FALSE}
+  cor(scale(df))
+```
+
+# ACP COMPUTO  {.tabset .tabset-fade .tabset-pills}
+
+## PASO a PASO  {.tabset .tabset-fade .tabset-pills}
+
+### NO ESCALADO
+
+```{r, echo=TRUE, warning=FALSE, out.width = "600px"}
+S <- cov(df)
+sum(diag(S))
+s.eigen <- eigen(S)
+s.eigen$values
+B=0
+for (s in s.eigen$values) {
+                          A=s / sum(s.eigen$values) 
+                          B=A+B
+                          C=data.frame(cbind(A,s))
+                          print(C)
+                          }
+plot(s.eigen$values, 
+     xlab = 'Valor Propio (n)', 
+     ylab = 'Valor Propio (q)', 
+     main ='Scree')
+lines(s.eigen$values)
+
+VectoresPropiosCov=s.eigen$vectors
+print(VectoresPropiosCov)
+PCov=scale(df)%*%VectoresPropiosCov
+print(PCov)
+plot(PCov[,1],PCov[,2])
+
+biplot(prcomp(df))
+```
+
+### ESCALADO
+
+```{r, echo=TRUE, warning=FALSE, out.width = "600px"}
+S <- cov(scale(df))
+sum(diag(S))
+s.eigen <- eigen(S)
+s.eigen$values
+B=0
+for (s in s.eigen$values) {
+                          A=s / sum(s.eigen$values) 
+                          B=A+B
+                          C=data.frame(cbind(A,s))
+                          print(C)
+                          }
+plot(s.eigen$values, 
+     xlab = 'Valor Propio (n)', 
+     ylab = 'Valor Propio (q)', 
+     main ='Scree')
+lines(s.eigen$values)
+
+s.eigen$vectors
+
+PC <- scale(df) %*% s.eigen$vectors
+
+print(PC)
+
+plot(PC[,1],PC[,2])
+
+biplot(prcomp(df))
+
+```
+
+## ACP con *FactoMineR* {.tabset .tabset-fade .tabset-pills}
+
+Con FactoMineR el camino es más corto
+
+```{r, echo=TRUE, warning=FALSE, out.width = "600px",include=TRUE}
+  acp.df.FM=FactoMineR::PCA(df)
+```
+
+ScreePlot
+```{r, echo=TRUE, warning=FALSE, out.width = "800px",include=TRUE}
+  fviz_eig(acp.df.FM, addlabels = TRUE, ylim = c(0, 80))
+```
+
+A fin de que la visualización sea amigable, vale la pena agregar un poco de color y cambiar el output que la herramienta entrega por defecto
+
+- VALORES PROPIOS Y APORTE DE VARIANZA
+```{r, echo=TRUE, warning=FALSE,include=TRUE}
+  print(acp.df.FM$eig)
+```
+
+### RES: VARIABLES
+
+```{r, echo=TRUE, warning=FALSE, out.width = "800px"}
+  factoextra::fviz_pca_var(
+                          acp.df.FM, col.var="contrib",
+                          gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                          repel = TRUE # Avoid text overlapping
+                          )
+```
+
+-Coordenadas
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$var$coord)
+```
+
+-$\text {Coseno}^2$
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$var$cos2)
+```
+
+-Contribucion
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$var$contrib)
+```
+
+-Aporte a la dimensión
+```{r, echo=TRUE, warning=FALSE, out.width = "600px"}
+  corrplot(acp.df.FM$var$contrib, is.corr=FALSE)
+```
+
+
+### RES: INDIVIDUOS
+
+```{r, echo=TRUE, warning=FALSE}
+fviz_pca_ind(
+             acp.df.FM,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+```   
+
+-Coordenadas
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$ind$coord)
+```
+
+-$\text {Coseno}^2$
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$ind$cos2)
+```
+
+-Contribución
+```{r, echo=TRUE, warning=FALSE}
+  print(acp.df.FM$ind$contrib)
+```
+
+### RES: AMBOS     
+
+```{r, echo=TRUE, warning=FALSE}
+fviz_pca_biplot(acp.df.FM, repel = TRUE,
+                col.var = "#2E9FDF", # Variables color
+                col.ind = "#696969"  # Individuals color
+                )
+```
+
+# ANEXOS
+
+## ANEXO 01
+
+```{r, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+xfun::embed_file('TEMA002_ACP_DS.xlsx')
+```
+
+## ANEXO 02
+
+```{r, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+xfun::embed_file('matrix.zip')
+```

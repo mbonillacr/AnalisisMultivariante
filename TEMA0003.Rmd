@@ -1,0 +1,1185 @@
+---
+title: "Especialidad CD: Multivariante I"
+author: "Minor Bonilla Gómez"
+date: "minor.bonilla@ulead.ac.cr"
+output:
+  rmdformats::material:
+    highlight: kate
+    self_contained: true
+    code_folding: show
+    thumbnails: true
+    gallery: true
+    fig_width: 4
+    fig_height: 4
+    df_print: kable
+---
+
+```{r echo_f, include=FALSE, message=FALSE, warning=FALSE}
+
+  knitr::opts_chunk$set(echo = FALSE)
+  CLASE00="F:/LEAD/2020/ESS/002 IMAGENES/CL00/"  
+  CLASE01="F:/LEAD/2020/ESS/002 IMAGENES/CL01/"
+  PONENCIA="F:/BKLLB/PONENCIAS/ACADEMICAS/UCR/2020/CHARLA DATA SCIENCE BS/IMAGENES/"
+  RUTAACTUAL="F:/LEAD/2020/ESP/CLASES/0002/"
+  
+```
+
+```{r, echo=FALSE, out.width = "400px",fig.align="left", message=FALSE, warning=FALSE}
+    IMG=paste0(PONENCIA,"CIPAD-Logo.png")
+    knitr::include_graphics(IMG)
+```
+
+
+<!------------FORMATO--------------->
+
+<style>
+      .page {
+            transform: translateY(1080px);
+            transition: transform 0 linear;
+            visibility: hidden;
+            opacity: 0;
+            font-size: 20px;
+            margin-left: 1em;
+            }
+      .pages h1 {
+                color: #f5b815;
+                font-style: bold;
+                margin-top: 5px;
+                }
+      .header-panel h4.date {
+                            font-size: 16px;
+                            color: #f5b815;
+                            padding-left: 35px;
+                            margin: 5px 0px;
+                            font-style: bold;
+                            }
+        a, a:focus, a:hover {
+                            color: #99a83d;
+                            }                            
+      body {
+            text-align: justify
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #28105E;
+            background-color: #fff;
+           }
+    .header-panel {
+                  background-color: rgb(33, 44, 85);
+                  min-height: 144px;
+                  position: relative;
+                  z-index: 3;
+                }
+    .panel {
+            margin-bottom: 20px;
+            background-color: rgba(255,255,255,0);
+            border: 1px solid transparent;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0);
+            box-shadow: 0 1px 1px rgba(0,0,0,0);
+          } 
+    body .container .jumbotron, 
+    body .container .jumbotron-default, 
+    body .container .well, 
+    body .container .well-default, 
+    body .container-fluid .jumbotron, 
+    body .container-fluid .jumbotron-default, 
+    body .container-fluid .well, 
+    body .container-fluid .well-default {
+                                        background-color: #e6e2e2;
+                                        }        
+    .nav-pills>li.active>a,
+    .nav-pills>li.active>a:focus, 
+    .nav-pills>li.active>a:hover {
+                                  color: #fff;
+                                  background-color: rgb(33, 44, 85);
+                                  }
+    .nav-pills>li>a {
+                     border-radius: 4px;
+                    }
+    .nav>li>a {
+              position: relative;
+              display: block;
+              padding: 10px 15px;
+              }
+    a, 
+    a:focus, 
+    a:hover {
+              color: #093e39;
+            }
+    .menu ul li a {
+                  color: rgb(51, 51, 51);
+                  text-decoration: none;
+                  }        
+            
+</style>
+
+<!------------CONTENIDO--------------->
+
+# {.tabset .tabset-fade .tabset-pills}
+
+## Intro
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(PONENCIA,"Fractal Loop 2.gif")
+    knitr::include_graphics(IMG)
+```
+
+## Analsis vs ML
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE00,"OLS vs ML.gif")
+    knitr::include_graphics(IMG)
+```
+
+
+```{r, out.width = "800px",fig.align="center", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"MLjoke.jpg")
+    knitr::include_graphics(IMG)
+```
+
+## Syll
+
+>"...The present ‘machine learning’ and ‘big data’ hype shows that   
+many social scientists — falsely — think that they can get away with   
+analysing real-world phenomena without any (commitment to) theory.   
+>
+But data never speaks for itself. 
+>
+Without a prior statistical set-up,   
+there actually are no data at all to process.   
+>
+And using a machine learning algorithm will only produce what you are  
+looking for.
+>
+Theory matters..."     
+>
+- Lars Syll-
+
+[Syll](https://www.worldeconomicsassociation.org/newsletterarticles/econometric-models-wrong/) 
+
+<!---- 
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://www.worldeconomicsassociation.org/newsletterarticles/econometric-models-wrong/'>
+</iframe>
+---->
+
+# LIBRERIAS
+
+```{r librerias, include=TRUE, message=TRUE, warning=FALSE, echo=TRUE}
+
+# Dado que algunas de estas librerias podrían no estar instaladas en nuestra máquina, resulta de suma 
+# importancia instalarlas antes -de ser necesario-; para ello usaremos el comando *install.packages* que 
+# en nuestro caso particular: install.packages("NOMBRE_LIBRERIA")
+
+# Todos los cómputos mostrados pueden ser reproducidos en una máquina personal que tenga instalado R.
+  
+ set.seed(123456789)
+
+ suppressPackageStartupMessages(library(rmarkdown))
+ suppressPackageStartupMessages(library(datarium))
+ suppressPackageStartupMessages(library(knitr))
+ suppressPackageStartupMessages(library(magrittr))
+ suppressPackageStartupMessages(library(kableExtra))
+ suppressPackageStartupMessages(library(FactoMineR))
+ suppressPackageStartupMessages(library(factoextra))
+ suppressPackageStartupMessages(library(plotly))
+ suppressPackageStartupMessages(library(car))
+ suppressPackageStartupMessages(library(lmtest))
+ suppressPackageStartupMessages(library(tufte))
+ suppressPackageStartupMessages(library(MASS))
+ suppressPackageStartupMessages(library(stargazer))
+ 
+```
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+
+# INTRODUCCIÓN {.tabset .tabset-fade .tabset-pills}
+
+## IMG-01
+
+```{r, out.width = "800px",fig.align="left", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"extrapolating.PNG")
+    knitr::include_graphics(IMG)
+```
+
+## IMG-02
+```{r, out.width = "800px",fig.align="left", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva6.PNG")
+    knitr::include_graphics(IMG)
+```
+
+## IMG-03
+```{r, out.width = "800px",fig.align="left", message=FALSE, warning=FALSE, echo=FALSE}
+    IMG=paste0(CLASE01,"Diapositiva7.PNG")
+    knitr::include_graphics(IMG)
+```
+
+# REGRESION LINEAL {.tabset .tabset-fade .tabset-pills}
+
+Nos interesa ahora introducir un nuevo elemento a nuestro entorno. 
+
+Recordemos que hasta ahora hemos trabajado partiendo de la existencia única de el objeto $X_{(n,p)}$, con lo que nuestro proceso ha sido orientado internamente (*no supervisado*).
+
+Permitiremos la existencia de un nuevo elemento que contiene la información sobre el fenómeno que deseamos estudiar, y que servirá de orientación al proceso completo (*supervisado*). 
+
+## REGRESION
+
+Permitiremos que éste nuevo elemento, que contiene la información sobre el fenómeno que deseamos estudiar (variable $Y$) asuma valores numéricos y que además almacene cada realización del fenómeno para cada individuo, con lo que podemos expresar nuestro fenómeno como un vector columna.
+
+$$Y_{(n,1)} = \left[ 
+                \begin{array}
+                       \\
+                 y_{1} \\
+                 y_{2} \\
+                 ...   \\
+                 y_{n} \\
+                       \\ 
+                \end{array}
+              \right]$$
+        
+Sabiendo que nuestro problema puede estar influído (linealmente) por otras variables relacionadas con nuestro fenómeno, podemos entonces pensar que existen ponderadores lineales, que nos permitan aproximar nuestro fenómeno, a partir de combinaciones lineales de las variables independientes (X's). 
+
+## COEFICIENTES
+
+Llamemos $\beta$ a nuestros ponderadores y permitamos que sean tantos como variables explicativas (recordemos que nos dictan la cantidad de cada variable que vamos utilizar) y permitamos además que exista uno adicional, al que permitiremos estar libre de relaciones con la tabla de datos $X_{(n,p)}$ 
+de forma que tenemos tantos elementos como variables, más uno.
+
+Se tiene que:
+
+$$\beta_{(p+1,0)}=\left[
+                    \begin{array}
+                     \\
+                      \beta_{0} \\
+                      \beta_{1} \\
+                      \beta_{2} \\
+                          ... \\
+                      \beta_{p} 
+                     \\
+                    \end{array}
+                  \right]$$
+        
+Adicionalmente y dado que no somos capaces de almacenar toda la información que podria estar relacionada con el fenómeno en estudio (lo único que hacemos es una representación aproximada de la realidad), debemos aceptar que algunos elementos serán incorrectamente aproximados (bien sea por mediciones imperfectas, o bien por que no somos capaces de contemplar el panorama completo) haciendo que nuestra estimación NUNCA sea exacta. 
+
+## ERRORES
+
+Dicho esto, existirá para cada individuo en nuestra estimación un error que denominaremos $\epsilon_{(n,1)}$ que no conteniendo información relevante  del proceso, deberá sólo contener ruido aleatorio.
+
+Nuestro problema puede entonces ser presentado como
+
+$$\hat Y_i = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots \beta_p X_p + \epsilon$$
+
+ o de manera reducida como
+ 
+ $$\hat Y_i = \beta_0 + \sum_{(i=1)}^{p} \beta_i X_i + \epsilon_i$$
+
+donde $\hat Y_i$ es nuestra mejor estimación para $Y_i$
+
+# MATRICIALMENTE {.tabset .tabset-fade .tabset-pills}
+
+Reexpresando nuestro fenómeno en forma matricial, tenemos que:
+
+## MATRICIALMENTE
+
+$$\mathbf{Y} = \mathbf{X}^T\mathbf{\beta} + \mathbf{\epsilon}$$
+$$Y = \left[\begin{array}
+        {}
+         y_{1} \\
+         y_{2} \\
+        ...    \\
+         y_{n}  
+        \end{array}\right]$$
+        
+$$X = \left[\begin{array}
+        {}
+        1   & x_{1,1}    & x_{1,2} & ...& x_{1,p} \\
+        1   & x_{2,1}    & x_{2,2} & ...& x_{2,p} \\
+        ... & ...        & ...     & ...& ....    \\
+        1   & x_{n,1}    & x_{n,2} & ...& x_{n,p} 
+        \end{array}\right]$$
+        
+$$\beta = \left[\begin{array}
+        {}
+         \beta_{0} \\
+         \beta_{1} \\
+         \beta_{2} \\
+              ...  \\
+         \beta_{p}  
+        \end{array}\right]$$
+        
+$$\epsilon = \left[\begin{array}
+        {}
+         \epsilon_{1} \\
+         \epsilon_{2} \\
+              ... \\
+         \epsilon_{n}  
+        \end{array}\right]$$
+
+Dado que asumimos que entre el vector de ruído y nuestros regresores no existe relación alguna, podemos esperar que
+
+$$ E{(\epsilon|X)} = 0$$ 
+
+## COVARIANZA de ERRORES
+
+además, con el vector de errores podemos tener una noción de la variabilidad de nuestro modelo a partir de 
+
+$$ \epsilon^{t}\epsilon$$ 
+
+Adicionalmente nuestra matriz de covarianzas para los residuos puede ser expresada como la multiplicación de nuestra varianza y una matriz identidad. (notar que al no existir relación entre los regresores y el vector estocástico, dichas covariaciones alcanzan un valor de cero)
+
+ $$\left[\begin{array}
+        {}
+        \sigma_{\epsilon_{1},\epsilon_{1}}    & \sigma_{\epsilon_{1},\epsilon_{2}}  & ...& \sigma_{\epsilon_{1},\epsilon_{p}}  \\
+        \sigma_{\epsilon_{2},\epsilon_{1}}    & \sigma_{\epsilon_{2},\epsilon_{2}}  & ...& \sigma_{\epsilon_{2},\epsilon_{p}}  \\
+        ... & ...        & ...     & ...    \\
+        \sigma_{\epsilon_{p},\epsilon_{1}}    & \sigma_{\epsilon_{p},\epsilon_{2}}  & ...& \sigma_{\epsilon_{p},\epsilon_{p}}  \\
+        \end{array}\right]$$
+        
+pero dado que el vector de errores NO GUARDA INFORMACION se tiene que
+
+$$\sigma_{\epsilon_{i},\epsilon_{j}}=0, ~ ~ \forall  i\neq j$$
+con lo que
+
+ $$\left[\begin{array}
+        {}
+        \sigma_{\epsilon_{1},\epsilon_{1}}     & 0  & ...& 0  \\
+        0 & \sigma_{\epsilon_{2},\epsilon_{2}} & ...& 0  \\
+        ... & ...        & ...     & ...    \\
+        0  &  0 & ...& \sigma_{\epsilon_{2},\epsilon_{2}}  \\
+        \end{array}\right]$$
+
+y dado que los errores ocurren para todos por igual
+
+$$\sigma_{\epsilon_{i},\epsilon_{j}}=\hat\sigma^2, ~ ~ \forall  i = j$$
+ $$\left[\begin{array}
+        {}
+        \hat\sigma^2     & 0  & ...& 0  \\
+        0 & \hat\sigma^2  & ...& 0  \\
+        ... & ...        & ...     & ...    \\
+        0  &  0 & ...& \hat\sigma^2   \\
+        \end{array}\right]$$
+
+$$Var{(\epsilon|X)}=\hat\sigma^2I$$  
+
+Dado que asumimos que los errores tienen media cero y varianza fija, el proceso generador de errores sigue una distribución del tipo:
+
+$$\epsilon \sim N(0, \sigma^2 I)$$
+
+# OBTENCION PARÁMETROS
+
+Habiendo aceptado las asunciones sobre el vector de ruido, podemos entonces pensar en la obtención del vector de coeficientes *BETA*.
+
+A partir de que 
+
+$$Y = {X}^t \beta + \epsilon $$
+se tiene que:
+
+$$\epsilon  = Y - {X}^t \beta$$
+Con esa simple reexpresión, estamos interesados en buscar aquel vector de coeficientes *betas* que reduzcan los errores de estimación, particularmente la suma de los errores cometidos. 
+
+Sin embargo, dado que los errores pueden ser tanto positivos como negativos, podríamos ser víctimas del neteo entre positivos y negativos, por lo que a fin de evitar dicho elemento, nos enfocamos en la noción de minimizar los errores cuadráticos; particularmente su suma. 
+
+$$\mathbf{\epsilon}^t \mathbf{\epsilon} = (\mathbf{Y} - \mathbf{X}^t\mathbf{\beta})^t(\mathbf{Y} - \mathbf{X}^t\mathbf{\beta}) 
+\\
+\mathbf{\epsilon}^t \mathbf{\epsilon} = \mathbf{Y}^t\mathbf{Y} - \mathbf{Y}^t \mathbf{X}^t\mathbf{\beta} -{\beta}\mathbf{X}^t \mathbf{Y} +{\beta}\mathbf{X}^t \mathbf{X}\mathbf{\beta}$$
+
+dado que nos interesa minimizar esa forma cuadrática, a partir de las Condiciones de Primer Orden, tenemos que:
+
+$$\frac{\partial \mathbf{\epsilon}^t \mathbf{\epsilon} }{\partial \mathbf{\beta}}=0$$
+
+$$\frac{\partial {\epsilon}^t {\epsilon} } {\partial {\beta}} = 
+  \frac{\partial Y^t Y} {\partial \beta}-
+  \frac{\partial Y^t X^t \beta}{\partial \beta}-
+  \frac{\partial \beta X^t Y}{\partial \beta}+
+  \frac{\partial \beta X^t X \beta}{\partial \beta}$$
+  
+
+
+$$\frac {\partial \epsilon^t \epsilon} {\partial \beta}=0-Y^t X - X^t Y^t + 2{\beta}^t X^t X =0 $$
+$$ 2 {\beta}^t X^t X = Y^t X + {(X^t Y)}^t $$
+$$ 2 {\beta}^t  X^t X = Y^t X + Y^t X $$
+$$ 2 {\beta}^t  X^t X = 2 Y^t X $$
+$$   {\beta}^t  X^t X =   Y^t X $$
+$$   {\beta}^t = Y^t X {(X^t X)}^{-1}  $$
+$$   \beta =  {(X^t X)}^{-1} X^t Y  $$
+
+Habiendo derivado el resultado analítico de los estimadores, podemos ahora conocer algunos de los riesgos asociados al estimador.
+
+# EJEMPLO en R {.tabset .tabset-fade .tabset-pills}
+
+Regresión lineal por Mínimos Cuadrados Ordinarios (MCO) es una de las t?cnicas mayormente utilizadas en el análisis de datos. La facilidad en su cómputo, así como su fácil interpretación la hacen una de las técnicas más populares. 
+
+En este ejercicio usaremos los datos de *MARKETING* contenidos en la librería *datarium* así como un set de datos artificiales, con los que ejemplificaremos algunos de los problemas de mayor relevancia de esta técnica, para finalizar con la integración del Análisis de Componentes Principales en el proceso. 
+
+Procedemos a cargar los datos *MARKETING* que contienen el impacto del gasto en tres medios, a saber: Youtube, Facebook y Periodicos, sobre las ventas. Los datos corresponden al presupuesto de gasto en medios publicitarios (medidos en miles de dólares). 
+
+Este experimento ha sido repetido 200 veces teniéndose un registro para cada uno de ellos.
+
+```{r, out.width = "800px"}
+Datos= marketing
+stargazer(Datos, type="text")
+```
+
+Procedemos a realizar los habituales conteos, para comprender el tamaño del conjunto de datos, tanto en cantidad de registros **N** como de dimensiones **P**.
+
+```{r}
+N=nrow(Datos)
+P=ncol(Datos)
+```
+
+## ENTRENAMIENTO
+
+Estamos interesados en comprender además de la estructura del modelo, su capacidad predictiva *fuera de muestra* es decir, con datos que no fueron empleados en la construcción del modelo. Para ello vamos a separar el conjunto de datos en dos grupos *training* o entrenamiento y *test* o prueba. 
+
+La primer porcion *training* sera empleada para obtener los coeficientes del modelo, mientras que la segunda *test* nos permitirá observar como se comporta éste, cuando ingresan nuevas observaciones. Para ello nos dejaremos una porción respectiva para cada tarea, que en este caso hemos definido de manera arbitraria en *ENTRENAMIENTO =* 75% y *PRUEBA =* 25%. 
+
+El parametro *pPorcTraining* será el responsable de mantener estas proporciones
+
+```{r}
+pPorcTraining=3/4
+```
+
+Dado que los datos podrian mantener algún tipo de orden es importante "barajearlos" y con ello romper cualquier orden preestablecido. Una forma simple, consiste muestrearlos a todos.
+
+```{r}
+set.seed(123456789)
+random<-sample(1:N)
+```
+
+Construimos el parámetro de cantidad de elementos a emplear tanto en el *Entrenamiento* como en las *Pruebas*.
+
+```{r}
+num.Datos.training<-as.integer(pPorcTraining*N)
+```
+
+habiendo definido el parámetro anterior podemos definir los conjuntos de observaciones que pasan a a los conjuntos *TEST y TRAIN*
+
+```{r}
+set.seed(123456789)
+training.indices<-random[1:num.Datos.training]
+testing.indices <-random[(num.Datos.training+1):N]
+```
+
+Habiendo asignado cada observación a su respectivo conjunto, procedemos a cargar los datos en uno y otro bloque.
+
+```{r}
+training.set <- Datos[training.indices,]
+testing.set  <- Datos[testing.indices,]
+
+stargazer(training.set, type="text")
+stargazer(testing.set, type="text")
+
+```
+
+Dando una revisión visual a las relaciones de pares de variables
+
+```{r, out.width = "800px"}
+pairs(training.set)
+```
+
+## ESTIMACION
+
+Estamos interesados en conocer el efecto que tienen sobre las ventas los diversos montos gastados en cada uno de los medios. 
+
+Asumiendo que dicha relacion es lineal, planteamos la relación de dependencia de nuestra variable *sales* como relacion **~** aditiva de las variables *youtube*, *facebook* y  *newspaper*
+
+```{r}
+especificacion="sales ~ youtube + facebook + newspaper"
+```
+
+Iniciamos tomando el conjunto de datos completo, para comprender las relaciones multidimensionales de las variables, así como poder extraer alguna información relevante de las variables incorporadas
+
+```{r}
+Modelo <- lm(especificacion, data = Datos)
+stargazer(Modelo, type="text")
+```
+
+El resultado anterior pone de manifiesto la poca relevancia estadística de la variable *newspaper* cuyo valor t alcanza un bajo valor cercano a 0.5 (*como regla de dedo, este valor deberia ser superior a |2|*). Algunas otras sospechas derivan del valor de la mediana de los errores, cuyo valor es distinto de cero violando el supuesto que presupone que los errores tienen media CERO. 
+
+Ahora bien, dado que podemos estar no sólo interesados en las relaciones entre variables, sino tambien en la capacidad de predecir nuevas observaciones, es que anteriormente separamos nuestro conjunto de datos en 'training' para el que guardamos 150 observaciones y 'test' para el que guardamos '50'. 
+
+La idea consiste en construir un modelo con las primeras 150 observaciones y luego predecir el resultado de ese modelo, con las 50 observaciones que no fueron empleadas para su construcción. Esto porque no interesa conocer el funcionamiento del modelo **fuera de muestra**. Pero esta particion puede sernos util tambien para contrastar si los coeficientes del modelo son robustos; es decir, no cambian drásticamente cuando cambia la muestra. 
+
+Procedemos entonces a computar 3 modelos, el primero con la información completa, el segundo con 150 registros y el tercero con 50, de forma tal que podamos analizar su comportamiento para distintas muestras.
+
+```{r}
+especificacion="sales ~ youtube + facebook + newspaper"
+
+ModeloTot <- lm(especificacion, data = Datos)
+ModeloEnt <- lm(especificacion, data = training.set)
+ModeloPru <- lm(especificacion, data = testing.set)
+
+stargazer(ModeloTot,ModeloEnt,ModeloPru, type="text")
+```
+
+Puede notarse que los coeficientes mantienen SIGNO y VALOR, a excepción del coeficiente asociado a NEWSPAPER, lo que llama nuestra atención.
+
+Debemos omitirla del análisis?
+
+## OMISION
+
+Procedemos a evaluar la opción de suprimir variable *newspaper* de nuestra especificación.
+
+```{r}
+especificacion="sales ~ youtube + facebook"
+```
+
+y a reestimar el modelo completo (a partir de ahora emplearemos el conjunto completo de datos)
+
+```{r}
+ModeloTotOmit <- lm(especificacion, data = Datos)
+stargazer(ModeloTot,ModeloTotOmit, type="text")
+```
+
+Pero se requiere un criterio OBJETIVO para tener un criterio preciso. En éste caso interesa *medir* la ganancia/pérdida de información que implica el cambio realizado. Para ello utilizaremos el criterio de información de *Akaike* a fin de comprender cual modelo pierde menos información. Escogeremos aquel con un menor valor para dicho criterio.
+
+Al suprimir de la especificación la variable *newspaper* es importante no cometer el error de enfocarnos sólo en la supuesta mejora del test T, sino de la mejora conjunta del modelo (o recíprocamente de pérdida de información de uno y otro). 
+
+Contrastaremos entre modelos, a partir de los criterios AIC (Criterio de Informacion de Akakie) y BIC (Criterio de información bayesiano). 
+
+En ambos casos nos interesa aquel cuyo valor sea inferior (dado que buscamos aquel que pierda la menor cantidad de información). Como evidencian los resultados, la omision de la variable *newspaper* no sólo se justifica por su poca o casi nula significancia estadística, sino tambien por el hecho de que aquel modelo que la excluye, nos presenta un menor AIC (así como un menor BIC) esto aún cuando la suma de errores cuadráticos de uno y otro es muy similar.
+
+```{r}
+
+OLS.AIC.OMI=AIC(ModeloTotOmit)
+OLS.BIC.OMI=BIC(ModeloTotOmit)
+OLS.SEC.OMI=deviance(ModeloTotOmit)
+
+OLS.AIC.TOT=AIC(ModeloTot)
+OLS.BIC.TOT=BIC(ModeloTot)
+OLS.SEC.TOT=deviance(ModeloTot)
+
+AIC=cbind(TOTAL=OLS.AIC.TOT, OMITIDO=OLS.AIC.OMI)
+BIC=cbind(TOTAL=OLS.BIC.TOT, OMITIDO=OLS.BIC.OMI)
+SEC=cbind(TOTAL=OLS.SEC.TOT, OMITIDO=OLS.SEC.OMI)
+
+TABLA=rbind(AIC,BIC,SEC)
+row.names(TABLA)=c("AIC","BIC","SEC")
+print(TABLA)
+  
+```
+
+## CONSIDERACIONES  {.tabset .tabset-fade .tabset-pills}
+
+El modelo de regresion lineal presupone el cumplimiento de 6 supuestos, necesarios todos para la correcta: 
+
+* (1) Interpretación 
+* (2) inferencia
+
+De ahi la importancia de validar su cumplimiento. 
+
+## MULTICOLINEALIDAD {.tabset .tabset-fade .tabset-pills}
+
+Hemos supuesto que la relacion se da entre las variables y la variable dependiente, pero entre ellas no hay relación alguna, algo que denotamos como independencia en los regresores. La violación de este supuesto conduce a que no podamos garantizar que nuestro estimador de regresión no pueda ser calificado como el Mejor Estimador Linealmente Insesgado (MELI).
+
+### MULTICOLINEALIDAD
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Multicolinealidad'>
+</iframe>
+
+>
+“...When there are strong linear relationships among the predictors in a regression analysis, the precision of the estimated regression coefficients in linear models declines compared to what it #would have been were the predictors uncorrelated with each other (Fox:359)"
+>
+
+###  VIF
+
+Procedemos entonces a medir dicha condición, empleando para ello el test VIF
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Factor_de_inflaci%C3%B3n_de_la_varianza'>
+</iframe>
+
+```{r}
+
+A=car::vif(ModeloEnt)
+B=car::vif(ModeloPru)
+C=car::vif(ModeloTot)
+TABLA=rbind(A,B,C)
+row.names(TABLA)=c("ENTRENAMIENTO", "PRUEBA", "TOTAL")
+print(TABLA)
+```
+
+Algunos autores señalan que un VIF superior a 4 sugiere la presencia de multicolinealidad
+
+## HETEROCEDASTICIDAD
+
+Hemos supuesto que la varianza de los errores se mantiene constante a lo largo del set de observaciones y que no está influenciado por los regresores de la ecuacion. 
+
+El supuesto de homocedasticidad nos permite realizar inferencia sobre los parametros de estimacion, luego, la violacion de éste supuesto -y la consecuente heterocedasticidad= puede inducirnos a error sobre la inferencia que realizamos, provocando conclusiones erradas sobre un parametro en particular.
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Heterocedasticidad'>
+</iframe>
+
+
+>
+El test de Breush & Pagan plantea la hipótesis nula de presencia de factores heterocedísticos en nuestra estimación. 
+>
+Como regla de dedo, buscamos que la probabilidad asociada al test sea mayor a 5%, con lo que rechazaríamos la hipótesis nula de que los residuos se comportan de manera homogénea
+>
+
+```{r}
+lmtest::bptest(ModeloEnt)
+lmtest::bptest(ModeloPru)
+lmtest::bptest(ModeloTot)
+```
+
+Encontrando evidencia sobre la posible presencia de un proceso heterocedástico, consideramos emplear el metodo de mínimos cuadrados ponderados procedimiento que permite imponer una estructura particular en la matriz de varianzas y covarianzas [vcov] para tratar de corregir el problema.
+
+```{r}
+ModeloEnt_w=lm(abs(ModeloEnt$residuals) ~ ModeloEnt$fitted.values)
+
+Ponderadores <- 1 / ModeloEnt_w$fitted.values^2
+
+especificacion="sales ~ youtube + facebook + newspaper"
+ModeloEnt_ww <- lm(especificacion, data = training.set, weights = Ponderadores)
+
+stargazer(ModeloEnt,ModeloEnt_ww, type="text")
+```
+
+```{r}
+lmtest::bptest(ModeloEnt)
+lmtest::bptest(ModeloEnt_ww)
+```
+
+## VALORES ATIPICOS   {.tabset .tabset-fade .tabset-pills}
+
+Regresión Lineal no está excenta de los efectos de los valores atípicos en la variable de respuesta y/o en sus regresores.
+
+Revisemos si nuestros errores tienen algun comportamiento cercano a 'normal' (de serlo los puntos formaran una diagonal perfecta)
+
+```{r, out.width = "800px"}
+qqnorm(rstandard(ModeloEnt), pch=23, bg='red', cex=2)
+qqnorm(rstandard(ModeloEnt_ww), pch=23, bg='red', cex=2)
+```
+
+### DISTANCIA DE COOK
+
+Requerimos una métrica que nos permita identificar el efecto que tiene una estimación particular sobre nuestro modelo. 
+
+sea $$\hat{Y} = X \hat\beta \\
+\text {recordemos que:}\\
+\beta=(X'X)^{-1}(X'Y) \\
+\text {sustituyendo tenemos que:}\\
+\hat{Y} = X(X'X)^{-1}(X'Y)\\
+\text {sea: } H= X(X'X)^{-1}X'\\
+\text{con lo que:}\\
+\hat{Y} = HY
+$$ 
+
+prestemos atención a la matriz *H*, ésta contiene una serie de ¨ponderadores¨ tales que en la diagonal de dicha matriz, se tiene información de apalancamiento que hace el individuo i sobre el modelo completo.
+
+$h_{(i,i)}$ puede ser obtenida a partir de  
+$$h_{(i,i)}=x_{i}'(X'X)^{-1}x_{i}$$ 
+Es decir a partir de computar la matriz H podemos tener una primer nocion del efecto de la i-esima observación sobre la estimacion completa.
+
+```{r, out.width = "800px"}
+tablaH=hatvalues(ModeloEnt)
+plot(tablaH)
+training.set[which(tablaH > 0.08),]
+```
+
+Habiendo obtenido la matriz H podemos proceder a realizar una serie de pruebas sobre nuestra estimación, para estudiar el efecto que pueden estar teniendo observaciones particulares en nuestro modelo.
+
+Nos interesa conocer el efecto que podrian tener observaciones anómalas sobre nuestra predicción, para ello definimos la razón
+
+$$ DFFIT_{i} = \frac {\hat Y_j -\hat Y_{j(i)}}{\hat \sigma_i \sqrt{H_{(i,i)}}}$$
+Cuando |DFFIT|>1 estamos en presencia de una observación sospechosa. 
+```{r, out.width = "800px"}
+plot(dffits(ModeloEnt), pch=23, bg='orange', cex=2, ylab="DFFITS")
+training.set[which(abs(dffits(ModeloEnt)) > 0.6),]
+```
+
+#### Cook
+
+Cuando estamos interesados en conocer el efecto que tiene una observacion particular sobre nuestro modelo completo, nos centramos mas bien en medir el efecto de cambio sobre nuesra funcion de estimación ante la eliminación de observaciones particulares, para ello empleamos el criterio de Distancia de Cook.
+
+
+$$ D_{i} = \sum_{j=1}^n\frac {(\hat Y_j -\hat Y_{j(i)})^2}{\hat \sigma_i^2(p+1)}$$
+
+```{r, out.width = "800px"}
+plot(cooks.distance(ModeloEnt), pch=23, bg='orange', cex=2, ylab="Distancia Cook")
+training.set[which(cooks.distance(ModeloEnt) > 0.1),]
+```
+
+
+Interesa medir si dichas observaciones pueden estar afectando además nuestro vector de parámetros $\beta$ para ello realizamos un contraste similar al realizado con DFFIT, ahora para dicho vector.
+
+$$ DFBETAS =  \frac {\hat \beta_j -\hat \beta_{j(i)}}{\hat \sigma_i\sqrt{(X'X)^{-1}}}$$
+de nuevo, valores mayores a 1, seran sospechosos de tener influencia en exceso sobre nuestros parametros.
+
+```{r, out.width = "800px"}
+plot(dfbetas(ModeloEnt)[,'youtube'], pch=23, bg='orange', cex=2, ylab="DFBETA(youtube)")
+plot(dfbetas(ModeloEnt)[,'facebook'], pch=23, bg='orange', cex=2, ylab="DFBETA(facebook)")
+plot(dfbetas(ModeloEnt)[,'newspaper'], pch=23, bg='orange', cex=2, ylab="DFBETA(newspaper)")
+
+training.set[which(abs(dfbetas(ModeloEnt)[,'youtube']) > 0.4),]
+training.set[which(abs(dfbetas(ModeloEnt)[,'facebook']) > 0.4),]
+training.set[which(abs(dfbetas(ModeloEnt)[,'newspaper']) > 0.4),]
+```
+Pero como siempre R tiene una respuesta más simple para nosotros...
+
+```{r}
+influence.measures(ModeloEnt)
+```
+
+
+```{r}  
+library(stargazer)
+  especificacion.tot="sales ~ youtube + facebook + newspaper"
+  modelo_tot.outlier <- lm(especificacion.tot, data = training.set[c(-6,-131),])
+  modelo_tot <- lm(especificacion.tot, data = training.set)
+  
+  especificacion.red="sales ~ youtube + facebook"
+  modelo_red.outlier <- lm(especificacion.red, data = training.set[c(-6,-131),])
+  modelo_red <- lm(especificacion.red, data = training.set)
+  stargazer(modelo_tot,modelo_tot.outlier, modelo_red, modelo_red.outlier,type='text')
+
+```
+
+### ESTIMACION ROBUSTA
+
+Han sido propuestas diversas alternativas robustas que intentan solventar dichos problemas. Para ello en R existen varias propuestas entre ellas la expuesta en la librería {robustbase}.
+
+Con ella procedemos a estimar nuestro modelo a fin de evitar los efectos que algunas observaciones podrían estar introduciendo sobre nuestros parámetros.
+
+```{r}
+
+especificacion="sales ~ youtube + facebook + newspaper"
+ModeloEnt_RB <- robustbase::lmrob(especificacion, data = training.set)
+summary(ModeloEnt_RB, type="text")
+
+```
+
+Al solicitar los pesos asignados a cada observacion (en el modelo habitual cada observación tiene un peso idéntico a las demás con valor 1) nos damos cuenta que algunas observaciones deben ser ponderadas con un valor inferior distinto, lo que nos indica que debemos estudiar estas observaciones para tener un criterio más amplio. 
+
+Siguiendo la indicación, procedemos a estimar excluyendo dos observaciones catalogadas como outliers por el proceso, a saber, observaciones 87 y 109.
+
+```{r}
+
+especificacion="sales ~ youtube + facebook + newspaper"
+ModeloEnt_RB <- robustbase::lmrob(especificacion, data = training.set[c(-87,-109),])
+
+summary(ModeloEnt_RB, type="text")
+
+```
+
+*Es importante notar, que esta condicion no otorga licencia alguna para excluirlas del análisis, sino que nos indica un análisis más estricto sobre ellas*
+
+por ahora, la exclusión de éstas observaciones no han logrado darle significancia a la variable Newspaper.
+
+Analicemos la especificacion reducida (sin *NEWSPAPER*)
+
+```{r}
+especificacion="sales ~ youtube + facebook"
+ModeloEnt_RB_Omit <- robustbase::lmrob(especificacion, data = training.set[c(-87,-109),])
+
+summary(ModeloEnt_RB_Omit, type="text")
+coeftest(ModeloEnt_RB_Omit, type = "HC0")
+```
+
+# VARIABLE RELEVANTE {.tabset .tabset-fade .tabset-pills}
+
+Y qué tal si la variable que eliminamos era relevante?
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='https://es.wikipedia.org/wiki/Especificaci%C3%B3n_(An%C3%A1lisis_de_la_regresi%C3%B3n'>
+</iframe>
+
+Entramos en un área de mucho cuidado relacionado con el hecho de excluir de nuestro análisis una variable relevante. Hasta ahora las violaciones a los supuestos han supuesto problemas de inferencia. La variable omitida introduce un problema superior, el sesgo en los parámetros. La importancia del tema es tal, que evaluaremos el problema en un espacio de datos controlados, creados apriori a fin de demostrar el problema de la violación de éste supuesto.
+
+## VARIABLE OMITIDA
+
+El riesgo de eliminar una variable relevante, es tan elevado, que puede llevarnos a decir absolutamente lo contrario a lo que deberíamos. 
+En este ejemplo demostraremos el riesgo de hacer uso discriminado de un instrumento que desconocemos.
+
+Fijamos la semilla aleatoria de forma tal, que podamos replicar el ejercicio con los mismos resultados
+
+```{r}
+set.seed(12345678)
+```
+
+En este caso queremos una muestra de tamaño N
+
+```{r}
+N=100
+```
+
+Para P variables que queremos crear (de manera controlada)
+
+```{r}
+P=3
+```
+
+Con los parámetros anteriores tendremos una cantidad **NP** de REALIZACIONES 
+
+```{r}
+REALIZACIONES = N*P
+```
+
+Aprovechando que somos dueños del proceso generador de datos, nos damos la libertad de *CREAR* los ponderadores que relacionarán nuestras variables artificiales. 
+
+A fin de no complicar el ejercicio, usaremos 
+
+$$\beta_{i}=2^{i-1}$$
+
+$$con~~i=[1,4]$$
+
+```{r}
+Beta_Gen=c()
+for  (i in 1 : 4){Beta_Gen[i]=2^(i-1)}
+```
+
+$$\beta = \left[\begin{array}
+          {rrr}
+          1\\
+          2\\
+          4\\
+          8
+\end{array}\right]$$
+
+Arbitrariamente le definimos una matriz de CORRELACIONES para la creación de un par de variables artificialmente correlacionadas en un bajo grado *0.1* (esto será particularmente importante más adelante cuando analicemos el supuesto de independencia en los estimadores)
+
+$$\beta = \left[\begin{array}
+          {rrr}
+          1    & 0.1 & 0.05  \\
+          0.1  &  1   & -0.1 \\
+          0.05 & -0.1 &  1  \end{array}\right]$$
+
+
+```{r}
+CORRELACION=matrix(c(1, 0.1,0.05,0.1,1,-0.1,0.05,-0.1,1), nrow=3, ncol=3)
+```
+
+## SET ARTIFICIAL
+
+Con todos los elementos, procedemos a crear nuestro set de variables "independientes"
+
+```{r}
+Datos = MASS::mvrnorm(n=N, mu=c(0, 0, 0), Sigma=CORRELACION, empirical=TRUE)
+Datos <- as.data.frame(Datos)
+colnames(Datos)=c("X1","X2","X3")
+X1=Datos[,1]
+X2=Datos[,2]
+X3=Datos[,3]
+
+```
+
+```{r, out.width = "800px"}
+plotly::plot_ly(Datos, x = ~X1, y = ~X2, z= ~X3, alpha = 0.4)%>%
+        add_markers(marker = list(line = list(color = "black", width = 0.25)))
+```
+
+Queda aún la tarea de *crear* nuestra variable dependiente **Y**. Para ello usaremos nuestros coeficientes 
+
+$$Y_i = ~\beta_0 +~\beta_1 X_{1,~i}+~\beta_2 X_{2,~i} +~\beta_3 X_{3,~i}+ ~ \epsilon_i$$
+
+a saber:
+
+$$Y_i = ~1 +~2 X_{1,~i}+~4 X_{2,~i} +~ 8 X_{3,~i}+ ~ \epsilon_i$$
+
+```{r}
+Datos$Y=Beta_Gen[1]+Beta_Gen[2]*X1+Beta_Gen[3]*X2+Beta_Gen[4]*X3+rnorm(N)
+```
+
+## ESTIMANDO
+
+```{r}
+especificacion="Y ~ X1 + X2 + X3"
+modelo <- lm(especificacion, data = Datos)
+summary(modelo)
+```
+
+Omitimos variables por *ignorancia* en este caso X2
+
+```{r}
+especificacion2="Y ~ X1 + X3"
+modelo2 <- lm(especificacion2, data = Datos)
+summary(modelo2)
+```
+
+##  INDEPENDENCIA  {.tabset .tabset-fade .tabset-pills}
+
+Independencia en los Regresores
+
+Y qué con el supuesto de independencia en los regresores?
+
+Ahora decidimos variar el proceso de generación de datos y para ellos definimos en la matriz de CORRELACIONES una relacion mas intensa entre el par de variables X1 y X2, a las que daremos un grado de relación mayor(en valor absoluto)que ahora será de *-0.75*
+
+$$\beta = \left[\begin{array}
+          {rrr}
+          1    & -0.75 & 0.05 \\
+          -0.75  &  1   & -0.1 \\
+          0.05 & -0.1 &  1 \end{array}\right]$$
+
+```{r}
+CORRELACION=matrix(c(1, -0.75,0.05,-0.75,1,-0.1,0.05,-0.1,1), nrow=3, ncol=3)
+```
+
+```{r}
+N=100
+P=3
+Datos = MASS::mvrnorm(n=N, mu=c(0, 0, 0), Sigma=CORRELACION, empirical=TRUE)
+X1=Datos[,1]
+X2=Datos[,2]
+X3=Datos[,3]
+```
+
+```{r}
+Beta_Gen=c()
+for  (i in 1 : 4){Beta_Gen[i]=2^(i-1)}
+Datos$Y=Beta_Gen[1]+Beta_Gen[2]*X1+Beta_Gen[3]*X2+Beta_Gen[4]*X3+rnorm(N)
+```
+
+```{r}
+especificacion="Y ~ X1 + X2 + X3"
+modelo <- lm(especificacion, data = Datos)
+summary(modelo)
+```
+
+### OMITIENDO
+
+Omitamos ahora nuestra olvidadiza variable X2
+
+Es importante notar lo que ahora pasará con el coeficiente de X1 (recordemos que ahora existe una relación estrecha de amistad entre X1 y X2). Debemos recordar que *por construccion* 
+
+$$~\beta_1=2~~~y~~~\beta_3=8~$$
+
+```{r}
+especificacion="Y ~ X1 + X3"
+modelo <- lm(especificacion, data = Datos)
+summary(modelo)
+```
+
+### CONSECUENCIA
+
+Violación: Independencia
+
+Veamos ahora qué sucede cuando no se respeta la independencia en los regresores
+
+Vamos a alterar un poco la *creación* de nuestros datos, haciendo que algunos de nuestros regresores esten relacionados. 
+
+```{r}
+
+Beta_Gen=list()
+for  (i in 1 : 4){Beta_Gen[i]=2^(i-1)}
+Beta_Gen=unlist(Beta_Gen)
+
+N=100
+set.seed(123)
+X1=10*rnorm(N)
+
+set.seed(456)
+a00=3
+a01=9
+
+X2=a00+a01*X1+rnorm(N)
+Y =Beta_Gen[1]+Beta_Gen[2]*X1+Beta_Gen[3]*X2+rnorm(N)
+
+df=data.frame(
+              "X1"=X1,
+              "X2"=X2,
+              "Y" =Y)
+
+print(Beta_Gen)
+mean(df$Y)
+mean(df$X1)
+mean(df$X2)
+
+especificacion="Y ~ X1 + X2"
+modelo <- lm(especificacion, data = df)
+summary(modelo)
+
+especificacion="Y ~ X1"
+modelo <- lm(especificacion, data = df)
+summary(modelo)
+
+```
+
+$$Y_i = ~\beta_0 +~\beta_1 X_{1,~i} +~\beta_2 X_{2,~i}+ ~ \epsilon_i$$
+
+$$X_{2,~i} = ~\alpha_0 +~\alpha_1 X_{1,~i}+ ~ \gamma_i\\
+con~\alpha_0=3~~y~~\alpha_1=9$$
+
+el resultado TEÓRICO entonces es:
+
+$$Y_i = ~\beta_0 +~\beta_1 X_{1,~i} +~\beta_2 ( ~\alpha_0 +~\alpha_1 X_{1,~i}+ ~ \gamma_i)+ ~ \epsilon_i$$
+$$Y_i = ~\beta_0 +~\beta_1 X_{1,~i} +~\beta_2  ~\alpha_0 +~\beta_2 ~\alpha_1 X_{1,~i}  +~\beta_2  ~ \gamma_i+ ~ \epsilon_i$$
+
+$$Y_i = ~\beta_0 + (~\beta_1 +~\beta_2 ~\alpha_1 ) X_{1,~i} +~\beta_2  ~\alpha_0   +~\beta_2  ~ \gamma_i+ ~ \epsilon_i$$
+
+$$Y_i = [ ~\beta_0 +~\beta_2  ~\alpha_0 + ~\beta_2 ~ \gamma_i ]+ (~\beta_1 +~\beta_2 ~\alpha_1 ) X_{1,~i} + ~ \epsilon_i$$
+$$Y_i = [ CONSTANTE]+ (~\beta_1 +~\beta_2 ~\alpha_1 ) X_{1,~i} + ~ \epsilon_i$$
+es decir, ya no podemos identificar por separado los efectos de
+$$ ~\beta_1 ~~ y~~\beta_2 $$
+
+No obstante la incluiremos en nuestra **especificación** dado que nos enseñaron que la MINERIA es buena :(
+
+# PRONÓSTICO {.tabset .tabset-fade .tabset-pills}
+
+Con este segundo modelo en mente, nos disponemos a realizar las debidas pruebas fuera de muestra. Para ello usaremos el conjunto de datos que habiamos reservado para dicho proposito, la porcion *TRAINING*.
+
+**R** facilita el comando *predict* que recibe por parámetros el modelo que estimamos y que internamente utilizará para realizar la predicción.
+
+*newdata* por su parte recibe los datos a los que queremos aplicar el modelo que acabamos de definir. En este caso, pasaremos la porción restante de datos (la que no usamos en la construcción del modelo) y que almacenamos en *testing*. Adicionalmente solicitamos que nos retorne el intervalo de confianza asociado a dicha predicción.
+
+```{r}
+OLS.PRED= predict(ModeloEnt, newdata = data.frame(testing.set), interval = "prediction")
+```
+
+Almacenaremos en una nueva tabla tanto la predicción, como el valor REAL observado, para poder realizar el contraste de nuestro modelo fuera de muestra y finalmente la diferencia entre ambos resultados
+
+```{r}
+TAB=cbind(
+          OLS.PRED,
+          Y_Observado=testing.set$sales,
+          ErrorPred=OLS.PRED[,1]-testing.set$sales
+          )
+knitr::kable(TAB,'html') %>%
+        kable_styling() %>%
+          scroll_box(width = "900px", height = "600px")
+```
+
+No está de más trabajar en la visualización del resultado obtenido de la predicción, asi como los intervalos inferior y superior de dicha estimación.
+
+```{r, out.width = "800px"}
+plot(OLS.PRED[,1], col=9,pch = 19)
+lines(OLS.PRED[,2], col = 2, lty = 3)
+lines(OLS.PRED[,3], col = 1, lty = 3)
+```
+
+# ACP+OLS  {.tabset .tabset-fade .tabset-pills}
+
+Como ya vimos, es difícil encontrar variables que cumplan con los supuestos de independencia en los regresores, pues las variables medidas resultan afectadas por de manera simultánea invalidando con ello la noción de *independencia en los regresores*.
+
+No obstante lo anterior, recordamos que cada uno de los componentes principales [CPs] obtenidos a partir del **Análisis de Componentes Principales - ACP** guarda una característica que ahora es necesaria: Cada uno de los *CPs* es ortogonal al resto, es decir, cumplen con el supuesto de independencia que buscamos. 
+Basta entonces obtener algunos componentes principales para usarlos nuevos regresores en nuestro modelo.
+
+## EJEMPLO: BOSTON HOUSES
+
+Este conjunto de datos contiene información sobre mas de 506 vecindarios de Boston, para los cuales fueron capturadas 14 variables, entre ellas el valor medio (medv) de las propiedades en cada localidad.
+
+Los datos pueden ser descargados de muchos sitios de la WEB como bostonhousing.csv 
+
+En este sitio puede descargarlos en formato de texto 
+
+[IR A DATOS](https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv)
+
+```
+This data frame contains 506 rows and 14 columns:
+
+crim:    per capita crime rate by town
+zn:      proportion of residential land zoned for lots over 25,000 sq.ft
+indus:   proportion of non-retail business acres per town
+chas:    Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+nox:     nitrogen oxides concentration (parts per 10 million)
+rm:      average number of rooms per dwelling
+age:     proportion of owner-occupied units built prior to 1940
+dis:     weighted mean of distances to five Boston employment centres
+rad:     index of accessibility to radial highways
+tax:     full-value property-tax rate per $10,000
+ptratio: pupil-teacher ratio by town
+Etnic:   1000(Bk - 0.63)^2 where Bk is the proportion of afro-american by town
+lstat:   lower status of the population (percent)
+medv:    median value of owner-occupied homes in $1000s
+
+Source
+Harrison, D. and Rubinfeld, D.L. (1978) Hedonic prices and the demand for clean air. J. Environ. Economics and Management 5.
+
+Belsley D.A., Kuh, E. and Welsch, R.E. (1980) Regression Diagnostics. Identifying Influential Data and Sources of Collinearity. New York: Wiley
+```
+
+
+<p align="center">
+<iframe 
+  width='900px' 
+  height='850px' 
+  src='http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.926.5532&rep=rep1&type=pdf'>
+</iframe>
+
+En el documento los investigadores estudiaron el problema de precios hedónicos, pero nos dejan en su apéndice una ecuación que resulta de gran relevancia para nuestro propósito.
+
+## ESTIMANDO
+
+```{r}
+library(knitr)
+
+rm(list = ls())
+
+ARCHIVO="f:/LEAD/DATASETS/boston.csv"
+
+df = read.csv(ARCHIVO)
+
+cor(df)
+
+especificacion="log(medv) ~  rm^2 + age + log(dis) + (rad) + tax + ptratio + black + log(lstat) + crim + zn + indus + chas + nox"
+OLS <- lm(especificacion, data = df)
+summary(OLS)
+```
+
+## ACP
+
+Al aplicar el ACP se tiene que
+
+```{r, out.width = "800px"}
+df_modificado = df[,2:13]
+
+res.pca = PCA(df,  graph = TRUE)
+summary(res.pca)
+```
+
+## ACP + OLS
+
+Tomamos de los resultados del ACP los componentes principales 1, 2 y 3 que contienen cerca de 2/3 partes de la información de nuestra varianza y los usamos como predictores de la variable de valor de casas en Boston
+
+```{r}
+x1=res.pca$ind$coord[,1]
+x2=res.pca$ind$coord[,2]
+x3=res.pca$ind$coord[,3]
+
+especificacion="log(medv) ~ x1+ x2"
+OLS.PCA <- lm(especificacion, data = df)
+summary(OLS.PCA)
+```
+
+Finalmente introducimos una métrica que nos permita comparar entre uno y otro modelo, en este criterio empleamos el criterio de información de Akaike (AIC) para contrastar el modelo original con el modelo transformado en regresores a través del **ACP**. Este criterio mide la pérdida de información entre uno y otro modelo; el criterio de selección entonces consiste en seleccionar aquel con un menor valor AIC. 
+
+Hay que considerar que este criterio *no mide la estructura del modelo, sino sólo su pérdida de información*
+
+
+```{r}
+print(c(AIC.OLS.PCA=AIC(OLS.PCA),AIC.OLS=AIC(OLS)))
+```
+
+# ANEXOS
+
+ANEXO 1
+
+[VALORES y VECTORES PROPIOS](https://www.khanacademy.org/math/linear-algebra/alternate-bases/eigen-everything/v/linear-algebra-example-solving-for-the-eigenvalues-of-a-2x2-matrix)
+
+ANEXO 1
+
+```{r, echo=FALSE}
+xfun::embed_file('f:/LEAD/2020/ESS/000 CLASES/CL0005/REGRESION XCL.xlsx')
+```
